@@ -9,7 +9,7 @@ export interface LoginUser {
   lastName: string;
   email: string;
   phoneNumber: string;
-  roles: string[];
+  accessType: "BUYER" | "LISTER";
 }
 
 export interface LoginResponse {

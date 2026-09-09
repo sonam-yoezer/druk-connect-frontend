@@ -1,8 +1,11 @@
 "use client";
 
 import { Check, Clock, Mail } from "lucide-react";
+
 import { BrandMark, cn, initialsOf } from "../Primitives";
 import { SignupSteps } from "./SignupSteps";
+
+type SignupRole = "LISTER" | "BUYER";
 
 const STATEMENTS = [
   {
@@ -32,6 +35,7 @@ const MEMBERS = [
 
 interface BrandPanelProps {
   step: number;
+  role: SignupRole;
   firstName: string;
   lastName: string;
   email: string;
@@ -39,19 +43,30 @@ interface BrandPanelProps {
 
 export function BrandPanel({
   step,
+  role,
   firstName,
   lastName,
   email,
 }: BrandPanelProps) {
-  const statement = STATEMENTS[Math.min(step, 4) - 1];
+  const isLister = role === "LISTER";
+
+  const totalSteps = isLister ? 4 : 3;
+
+  const statementIndex = isLister
+    ? Math.min(step, 4) - 1
+    : Math.min(step, 3) - 1;
+
+  const statement = isLister
+    ? STATEMENTS[statementIndex]
+    : STATEMENTS[Math.min(step, 3) - 1];
 
   return (
     <aside className="fixed inset-y-0 left-0 hidden w-[41%] min-w-95 max-w-135 flex-col justify-between overflow-hidden bg-panel px-11 py-10 text-panel-fg lg:flex">
-      {" "}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_20%_0%,rgba(75,69,209,0.28),transparent_65%)]"
       />
+
       {/* Top */}
       <div className="relative">
         <div className="mb-4 flex items-center justify-between gap-5">
@@ -64,12 +79,13 @@ export function BrandPanel({
           </span>
         </div>
 
-        <SignupSteps currentStep={step} tone="dark" />
+        <SignupSteps currentStep={step} totalSteps={totalSteps} tone="dark" />
       </div>
+
       {/* Statement */}
       <div className="relative">
         <p
-          key={`statement-${step}`}
+          key={`statement-${step}-${role}`}
           className="animate-step max-w-[13ch] font-serif text-[34px] font-light leading-[1.18] tracking-[-0.022em]"
         >
           {statement.heading}
@@ -79,14 +95,25 @@ export function BrandPanel({
           {statement.sub}
         </p>
       </div>
+
       {/* Context */}
       <div className="relative border-t border-panel-line pt-6">
+        {/* Step 1 */}
         {step === 1 && <RecentlyJoined />}
+
+        {/* Step 2 */}
         {step === 2 && <MailPreview email={email} />}
-        {step === 3 && <VouchExplainer />}
-        {step === 4 && (
+
+        {/* Lister Step 3 */}
+        {step === 3 && isLister && <VouchExplainer />}
+
+        {/* Lister Step 4 */}
+        {step === 4 && isLister && (
           <ProfilePreview firstName={firstName} lastName={lastName} />
         )}
+
+        {/* Buyer Step 3 */}
+        {step === 3 && !isLister && <BuyerFinishPreview />}
       </div>
     </aside>
   );
@@ -144,12 +171,18 @@ function MailPreview({ email }: { email: string }) {
   );
 }
 
-/* ── Step 3 ───────────────────────────────────────────────── */
+/* ── Lister Step 3 ─────────────────────────────────────────── */
 
 function VouchExplainer() {
   const slots = [
-    { name: "Tashi Wangchuk", state: "done" as const },
-    { name: "", state: "waiting" as const },
+    {
+      name: "Tashi Wangchuk",
+      state: "done" as const,
+    },
+    {
+      name: "",
+      state: "waiting" as const,
+    },
   ];
 
   return (
@@ -178,6 +211,7 @@ function VouchExplainer() {
                 </span>
 
                 <p className="truncate text-[13px] font-medium">{slot.name}</p>
+
                 <p className="mt-0.5 text-[12px] text-jade">Vouched</p>
               </>
             ) : (
@@ -203,7 +237,7 @@ function VouchExplainer() {
   );
 }
 
-/* ── Step 4 ───────────────────────────────────────────────── */
+/* ── Lister Step 4 ─────────────────────────────────────────── */
 
 function ProfilePreview({
   firstName,
@@ -243,6 +277,33 @@ function ProfilePreview({
           <span className="rounded-full bg-panel-fg/[0.07] px-2.5 py-1 text-[11.5px] text-panel-muted">
             1 of 2 vouches
           </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Buyer Step 3 ──────────────────────────────────────────── */
+
+function BuyerFinishPreview() {
+  return (
+    <div className="animate-step">
+      <p className="mb-3.5 text-[12.5px] text-panel-faint">Almost there</p>
+
+      <div className="rounded-2xl border border-panel-line bg-panel-raise p-4">
+        <div className="flex items-start gap-3">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-jade/20 text-jade">
+            <Check className="h-4 w-4" strokeWidth={2.4} />
+          </span>
+
+          <div>
+            <p className="text-[14px] font-medium">Your account is ready</p>
+
+            <p className="mt-1 text-[12.5px] leading-5 text-panel-muted">
+              Review the community guidelines and finish creating your
+              DrukConnect account.
+            </p>
+          </div>
         </div>
       </div>
     </div>

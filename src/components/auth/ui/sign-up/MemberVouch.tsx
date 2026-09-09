@@ -76,15 +76,21 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
    * Remove duplicate users returned by the API.
    */
   const uniqueResults = Array.from(
-    new Map(results.map((member) => [member.id, member])).values(),
+    new Map(results.map((member) => [member.userId, member])).values(),
   );
 
   const handleAskToVouch = (member: VouchUserSearchResponse) => {
+    console.log("=== VOUCH REQUEST DEBUG ===");
+    console.log("Selected member:", member);
+    console.log("Selected member ID:", member.userId);
+    console.log("Lister user ID:", userId);
     if (!userId) {
       return;
     }
 
-    const alreadyPending = pending.some((item) => item.id === member.id);
+    const alreadyPending = pending.some(
+      (item) => item.userId === member.userId,
+    );
 
     if (alreadyPending || pending.length >= requiredVouches || requirementMet) {
       return;
@@ -94,7 +100,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
       {
         requesterUserId: userId,
         payload: {
-          targetUserId: member.id,
+          targetUserId: member.userId,
           message: "I'd like you to vouch for me as a community member.",
         },
       },
@@ -102,7 +108,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
         onSuccess: () => {
           setPending((current) => {
             if (
-              current.some((item) => item.id === member.id) ||
+              current.some((item) => item.userId === member.userId) ||
               current.length >= requiredVouches
             ) {
               return current;
@@ -128,7 +134,9 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
    * this should call the backend instead.
    */
   const handleWithdraw = (memberId: string) => {
-    setPending((current) => current.filter((member) => member.id !== memberId));
+    setPending((current) =>
+      current.filter((member) => member.userId !== memberId),
+    );
   };
 
   /**
@@ -292,7 +300,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
 
             return (
               <div
-                key={`pending-${member.id}`}
+                key={`pending-${member.userId}`}
                 className="rounded-xl border border-line bg-surface p-3.5"
               >
                 <div className="flex items-center">
@@ -372,7 +380,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
                     `${member.firstName} ${member.lastName}`.trim();
 
                   const alreadyPending = pending.some(
-                    (item) => item.id === member.id,
+                    (item) => item.userId === member.userId,
                   );
 
                   const cannotRequest =
@@ -382,7 +390,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
 
                   return (
                     <li
-                      key={`search-${member.id}`}
+                      key={`search-${member.userId}`}
                       className="flex items-center justify-between gap-3 bg-surface px-3.5 py-3"
                     >
                       <div className="flex min-w-0 items-center gap-2.5">

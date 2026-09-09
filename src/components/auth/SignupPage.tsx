@@ -1,14 +1,19 @@
 "use client";
 
 import { useState } from "react";
+
 import { useEmailVerification } from "./hooks/useEmailVerification";
 import { useSignup } from "./hooks/useSignUp";
+
 import { AccountDetails } from "./ui/sign-up/AccountDetails";
 import { AgreeFinish } from "./ui/sign-up/AgreeFinish";
 import { AuthHeader } from "./ui/sign-up/AuthHeader";
 import { BrandPanel } from "./ui/sign-up/BrandPanel";
+import { ChooseRole } from "./ui/sign-up/ChooseRole";
 import { EmailVerification } from "./ui/sign-up/EmailVerification";
 import { MemberVouch } from "./ui/sign-up/MemberVouch";
+
+type SignupRole = "LISTER" | "BUYER";
 
 type SignupData = {
   firstName: string;
@@ -34,11 +39,14 @@ const INITIAL_SIGNUP_DATA: SignupData = {
 };
 
 const INITIAL_STEP = 1;
-const INITIAL_USER_ID = null;
 
 export default function SignupPage() {
+  const [role, setRole] = useState<SignupRole | null>(null);
+
   const [step, setStep] = useState(INITIAL_STEP);
-  const [userId, setUserId] = useState<string | null>(INITIAL_USER_ID);
+
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [signupData, setSignupData] = useState<SignupData>(INITIAL_SIGNUP_DATA);
 
   const [serverErrors, setServerErrors] = useState<
@@ -53,24 +61,60 @@ export default function SignupPage() {
     error: verificationError,
   } = useEmailVerification();
 
+  /**
+   * Lister:
+   * 1. Account Details
+   * 2. Email Verification
+   * 3. Member Vouch
+   * 4. Agree & Finish
+   *
+   * Buyer:
+   * 1. Account Details
+   * 2. Email Verification
+   * 3. Agree & Finish
+   */
+  const totalSteps = role === "LISTER" ? 4 : 3;
+
   const goToNextStep = () => {
-    setStep((currentStep) => Math.min(currentStep + 1, 4));
+    setStep((currentStep) => Math.min(currentStep + 1, totalSteps));
   };
 
   const goToPreviousStep = () => {
-    setStep((currentStep) => Math.max(currentStep - 1, 1));
+    setStep((currentStep) => Math.max(currentStep - 1, INITIAL_STEP));
+  };
+
+  const handleRoleSelect = (selectedRole: SignupRole) => {
+    setRole(selectedRole);
+    setStep(INITIAL_STEP);
+    setUserId(null);
+    setSignupData(INITIAL_SIGNUP_DATA);
+    setServerErrors({});
   };
 
   const handleAccountDetails = (data: SignupData) => {
-    // Clear previous backend errors
-    setServerErrors({});
+    /**
+     * The role must be selected before account details
+     * can be submitted.
+     */
+    if (!role) {
+      return;
+    }
 
+    /**
+     * Store the narrowed value locally.
+     *
+     * This prevents TypeScript from treating `role`
+     * as `SignupRole | null` when building the request.
+     */
+    const accessType: SignupRole = role;
+
+    setServerErrors({});
     setSignupData(data);
 
     signup(
       {
         ...data,
-        accessType: "LISTER",
+        accessType,
         communityGuidelinesAccepted: true,
       },
       {
@@ -84,6 +128,7 @@ export default function SignupPage() {
             setServerErrors({
               email: "An account already exists with this email address.",
             });
+
             return;
           }
 
@@ -91,6 +136,7 @@ export default function SignupPage() {
             setServerErrors({
               phoneNumber: "An account already exists with this mobile number.",
             });
+
             return;
           }
         },
@@ -117,9 +163,23 @@ export default function SignupPage() {
     );
   };
 
+  /**
+   * Show role selection before the signup flow starts.
+   */
+  if (!role) {
+    return (
+      <main className="min-h-screen bg-background text-ink">
+        <div className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-6 py-12">
+          <ChooseRole onSelect={handleRoleSelect} />
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-background text-ink lg:flex">
       <BrandPanel
+        role={role}
         step={step}
         firstName={signupData.firstName}
         lastName={signupData.lastName}
@@ -132,6 +192,7 @@ export default function SignupPage() {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex min-h-full justify-center px-6 pb-16 pt-8 sm:px-10 lg:px-12 lg:py-12">
             <div className="w-full max-w-110 lg:my-auto">
+              {/* STEP 1 — Account Details */}
               {step === 1 && (
                 <AccountDetails
                   onNext={handleAccountDetails}
@@ -140,6 +201,7 @@ export default function SignupPage() {
                 />
               )}
 
+              {/* STEP 2 — Email Verification */}
               {step === 2 && (
                 <EmailVerification
                   email={signupData.email}
@@ -149,11 +211,16 @@ export default function SignupPage() {
                 />
               )}
 
-              {step === 3 && (
+              {/* STEP 3 — Lister Vouch */}
+              {step === 3 && role === "LISTER" && (
                 <MemberVouch userId={userId} onNext={goToNextStep} />
               )}
 
-              {step === 4 && <AgreeFinish />}
+              {/* STEP 3 — Buyer Finish */}
+              {step === 3 && role === "BUYER" && <AgreeFinish />}
+
+              {/* STEP 4 — Lister Finish */}
+              {step === 4 && role === "LISTER" && <AgreeFinish />}
             </div>
           </div>
         </div>

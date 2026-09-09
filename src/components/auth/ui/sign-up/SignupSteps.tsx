@@ -11,17 +11,32 @@ export const STEPS = [
 
 interface SignupStepsProps {
   currentStep: number;
-  /** "light" sits on the form column, "dark" on the brand panel. */
   tone?: "light" | "dark";
   showLabel?: boolean;
+  totalSteps: number;
 }
 
 export function SignupSteps({
   currentStep,
   tone = "light",
   showLabel = true,
+  totalSteps,
 }: SignupStepsProps) {
-  const current = STEPS.find((step) => step.id === currentStep) ?? STEPS[0];
+  const visibleSteps = STEPS.slice(0, totalSteps);
+
+  const steps =
+    totalSteps === 3
+      ? [
+          STEPS[0],
+          STEPS[1],
+          {
+            id: 3,
+            label: "Guidelines",
+          },
+        ]
+      : visibleSteps;
+
+  const current = steps.find((step) => step.id === currentStep) ?? steps[0];
 
   return (
     <nav aria-label="Signup progress">
@@ -42,13 +57,13 @@ export function SignupSteps({
               tone === "dark" ? "text-panel-faint" : "text-faint",
             )}
           >
-            Step {current.id} of {STEPS.length}
+            Step {currentStep} of {totalSteps}
           </p>
         </div>
       )}
 
       <ol className="flex gap-1.5">
-        {STEPS.map((step) => {
+        {steps.map((step) => {
           const reached = step.id <= currentStep;
 
           return (
@@ -65,6 +80,7 @@ export function SignupSteps({
             >
               <span className="sr-only">
                 {step.label}
+
                 {step.id < currentStep
                   ? " — completed"
                   : step.id === currentStep

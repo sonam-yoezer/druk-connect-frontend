@@ -29,7 +29,7 @@ export default function SignInPage() {
         onSuccess: (response) => {
           setSession(response.user, response.accessToken);
 
-          router.push("/dashboard");
+          router.push("/buyer/dashboard");
         },
 
         onError: (error) => {

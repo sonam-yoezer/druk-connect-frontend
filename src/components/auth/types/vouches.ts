@@ -7,7 +7,7 @@ export interface VouchCountResponse {
 }
 
 export interface VouchUserSearchResponse {
-  id: string;
+  userId: string;
   firstName: string;
   lastName: string;
   email: string;
