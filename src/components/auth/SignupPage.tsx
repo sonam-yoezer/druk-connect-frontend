@@ -202,15 +202,15 @@ export default function SignupPage() {
               )}
 
               {/* STEP 2 — Email Verification */}
-              {step === 2 && (
+              {step === 2 && userId && (
                 <EmailVerification
                   email={signupData.email}
+                  userId={userId}
                   onNext={handleVerifyEmail}
                   isLoading={isVerifyingOtp}
                   error={verificationError}
                 />
               )}
-
               {/* STEP 3 — Lister Vouch */}
               {step === 3 && role === "LISTER" && (
                 <MemberVouch userId={userId} onNext={goToNextStep} />
