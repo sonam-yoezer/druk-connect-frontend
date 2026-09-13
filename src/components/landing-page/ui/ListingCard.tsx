@@ -1,5 +1,4 @@
 import { ArrowUpRight, MapPin } from "lucide-react";
-
 import { Listing } from "../types/landing";
 
 type ListingCardProps = {
@@ -8,34 +7,33 @@ type ListingCardProps = {
 
 export function ListingCard({ listing }: ListingCardProps) {
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-line bg-surface transition-all duration-200 hover:-translate-y-1 hover:border-line-strong hover:shadow-lg">
+    <article className="flex h-full flex-col overflow-hidden rounded-md border border-line bg-surface">
       {/* Image */}
       <div className="relative h-[190px] shrink-0 overflow-hidden bg-brand-tint">
         <img
           src={listing.image}
           alt={listing.title}
-          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="h-full w-full object-cover"
         />
 
         <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/25 via-transparent to-transparent"
           aria-hidden="true"
         />
 
-        <span className="absolute left-4 top-4 rounded-full bg-surface/95 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-ink shadow-sm">
+        <span className="absolute left-4 top-4 rounded-md bg-surface/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink">
           {listing.category}
         </span>
       </div>
 
       {/* Content */}
-      <div className="flex flex-1 flex-col p-6">
-        {/* Title & location */}
+      <div className="flex flex-1 flex-col p-5">
         <div>
           <h3 className="font-serif text-xl font-semibold leading-snug text-ink">
             {listing.title}
           </h3>
 
-          <div className="mt-3 flex items-center gap-1.5 text-xs text-muted">
+          <div className="mt-2.5 flex items-center gap-1.5 text-xs text-muted">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-faint" />
 
             <span>
@@ -47,9 +45,9 @@ export function ListingCard({ listing }: ListingCardProps) {
         </div>
 
         {/* Price */}
-        <div className="mt-6">
+        <div className="mt-5">
           {listing.free ? (
-            <span className="inline-flex rounded-full bg-jade-tint px-3 py-1.5 text-xs font-semibold text-jade">
+            <span className="inline-flex rounded-md bg-jade-tint px-3 py-1.5 text-xs font-semibold text-jade">
               Free
             </span>
           ) : (
@@ -66,10 +64,10 @@ export function ListingCard({ listing }: ListingCardProps) {
         {/* CTA */}
         <button
           type="button"
-          className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-ink px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand focus-visible:outline-none"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-ink px-4 py-3 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand focus-visible:outline-none"
         >
           Message on WhatsApp
-          <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight className="h-4 w-4" />
         </button>
       </div>
     </article>

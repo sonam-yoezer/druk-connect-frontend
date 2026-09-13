@@ -1,4 +1,3 @@
-import { ArrowUpRight } from "lucide-react";
 import { Spotlight } from "../types/landing";
 
 type SpotlightCardProps = {
@@ -7,36 +6,32 @@ type SpotlightCardProps = {
 
 export function SpotlightCard({ spotlight }: SpotlightCardProps) {
   return (
-    <article className="group flex h-full flex-col rounded-xl border border-line bg-surface p-5 transition-all duration-200 hover:-translate-y-1 hover:border-brand-line hover:shadow-lg">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="relative shrink-0">
-            <img
-              src={spotlight.image}
-              alt={spotlight.name}
-              className="h-12 w-12 rounded-full object-cover ring-2 ring-brand-tint"
-            />
+    <article className="flex h-full flex-col rounded-md border border-line bg-surface p-5">
+      <div className="flex items-center gap-3.5">
+        <div className="relative shrink-0">
+          <img
+            src={spotlight.image}
+            alt={spotlight.name}
+            className="h-12 w-12 rounded-full object-cover ring-2 ring-brand-tint"
+          />
 
-            <span
-              className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-jade"
-              aria-label="Verified community member"
-            />
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="truncate font-serif text-[16px] font-semibold leading-tight text-ink">
-              {spotlight.name}
-            </h3>
-
-            <p className="mt-1 text-xs text-muted">{spotlight.city}</p>
-          </div>
+          <span
+            className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-surface bg-jade"
+            aria-label="Verified community member"
+          />
         </div>
 
-        <ArrowUpRight className="h-4 w-4 shrink-0 text-faint transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand" />
+        <div className="min-w-0">
+          <h3 className="truncate font-serif text-base font-semibold leading-tight text-ink">
+            {spotlight.name}
+          </h3>
+
+          <p className="mt-1 text-xs text-muted">{spotlight.city}</p>
+        </div>
       </div>
 
       <div className="mt-5 border-t border-line pt-4">
-        <p className="text-sm leading-relaxed text-muted">
+        <p className="text-sm leading-6 text-muted">
           {spotlight.description}{" "}
           <strong className="font-semibold text-jade">
             {spotlight.highlight}

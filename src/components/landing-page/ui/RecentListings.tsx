@@ -187,9 +187,9 @@ export function RecentListings() {
 
           <Link
             href="/services"
-            className="group hidden shrink-0 items-center gap-2 rounded-full border border-line bg-background px-5 py-2.5 text-sm font-medium text-ink transition-all duration-200 hover:border-brand/40 hover:bg-brand hover:text-ink sm:inline-flex"
+            className="group hidden shrink-0 items-center gap-2 rounded-md border border-line bg-background px-5 py-2.5 text-sm font-medium text-ink transition-all duration-200 hover:border-brand/40 hover:bg-brand hover:text-white md:inline-flex"
           >
-            View all listings
+            View all services
             <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
           </Link>
         </motion.div>

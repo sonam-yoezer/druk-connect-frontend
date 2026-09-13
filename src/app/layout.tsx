@@ -3,6 +3,7 @@ import { Inter, Newsreader } from "next/font/google";
 
 import "./globals.css";
 import { QueryProvider } from "../providers/query-provider";
+import { Header } from "../components/landing-page/ui/Header";
 
 const newsreader = Newsreader({
   variable: "--font-newsreader",

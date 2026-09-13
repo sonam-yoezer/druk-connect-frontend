@@ -143,7 +143,7 @@ export function Hero() {
           >
             <Link
               href="/services"
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-6 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-md bg-brand px-6 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
             >
               Browse services
               <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -151,7 +151,7 @@ export function Hero() {
 
             <Link
               href="/auth/signup?role=lister"
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line-strong bg-surface px-6 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-6 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
             >
               <Tag className="h-4 w-4 text-muted transition-colors duration-200 group-hover:text-brand" />
               List your service

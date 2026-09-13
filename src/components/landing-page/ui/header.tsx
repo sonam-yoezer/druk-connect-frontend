@@ -104,7 +104,7 @@ export function Header() {
 
           <Link
             href="/auth/signup"
-            className="group ml-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-brand px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
+            className="group ml-1 inline-flex h-10 items-center justify-center gap-1.5 rounded-md bg-brand px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
           >
             Join DrukConnect
             <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
@@ -249,7 +249,7 @@ export function Header() {
                 <Link
                   href="/auth/signup"
                   onClick={closeMenu}
-                  className="group mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-brand px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
+                  className="group mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-brand px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand-dark"
                 >
                   Join DrukConnect
                   <ArrowUpRight className="h-4 w-4 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />

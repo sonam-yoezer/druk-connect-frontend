@@ -2,6 +2,7 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { Clock3, Shield, Users } from "lucide-react";
+
 import { TrustCard } from "./TrustCard";
 
 const trustItems = [
@@ -75,7 +76,7 @@ export function TrustSection() {
       />
 
       <motion.div
-        className="pointer-events-none absolute -right-40 top-0 h-80 w-80 rounded-full bg-pine/20 blur-3xl"
+        className="pointer-events-none absolute -right-40 top-0 h-80 w-80 rounded-full bg-jade/10 blur-3xl"
         animate={
           reduceMotion
             ? undefined
@@ -146,7 +147,7 @@ export function TrustSection() {
           initial={reduceMotion ? undefined : "hidden"}
           whileInView={reduceMotion ? undefined : "show"}
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-3"
+          className="grid grid-cols-1 gap-px overflow-hidden rounded-md border border-white/10 bg-white/10 md:grid-cols-3"
         >
           {trustItems.map((item) => (
             <motion.div key={item.title} variants={itemVariants}>
