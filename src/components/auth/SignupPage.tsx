@@ -12,6 +12,7 @@ import { BrandPanel } from "./ui/sign-up/BrandPanel";
 import { ChooseRole } from "./ui/sign-up/ChooseRole";
 import { EmailVerification } from "./ui/sign-up/EmailVerification";
 import { MemberVouch } from "./ui/sign-up/MemberVouch";
+import { Header } from "../landing-page/ui/Header";
 
 type SignupRole = "LISTER" | "BUYER";
 
@@ -169,7 +170,9 @@ export default function SignupPage() {
   if (!role) {
     return (
       <main className="min-h-screen bg-background text-ink">
-        <div className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-6 py-12">
+        <Header />
+
+        <div className="mx-auto flex min-h-screen w-full max-w-5xl items-center px-6 pb-16 pt-28">
           <ChooseRole onSelect={handleRoleSelect} />
         </div>
       </main>
