@@ -83,7 +83,7 @@ export const spotlights: Spotlight[] = [
 export const listings: Listing[] = [
   {
     category: "Car rental",
-    title: "2019 Toyota Camry, self-drive",
+    title: "2019 Toyota Camry, self-drive, negotiable",
     location: "Perth, WA",
     postedBy: "Tashi",
     price: "$55",
@@ -119,9 +119,9 @@ export const listings: Listing[] = [
     title: "Free airport pickup for new arrivals",
     location: "Perth, WA",
     postedBy: "Dechen",
+    price: "Free",
     image:
       "https://images.unsplash.com/photo-1494905998402-395d579af36f?w=500&q=80",
     accent: "pine",
-    free: true,
   },
 ];
