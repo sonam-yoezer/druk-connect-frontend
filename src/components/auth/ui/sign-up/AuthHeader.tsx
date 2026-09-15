@@ -29,7 +29,10 @@ export function AuthHeader({ step }: AuthHeaderProps) {
         </span>
       </div>
 
-      <SignupSteps currentStep={step} showLabel={false} />
-    </header>
+<SignupSteps
+  currentStep={step}
+  totalSteps={4}
+  showLabel={false}
+/>    </header>
   );
 }
