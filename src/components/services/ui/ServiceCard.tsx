@@ -1,37 +1,47 @@
 import Link from "next/link";
-import { ArrowUpRight, MapPin } from "lucide-react";
+import { ArrowUpRight, MapPin, Star } from "lucide-react";
 
-type Service = {
-  id: number;
-  title: string;
-  category: string;
-  location: string;
-  description: string;
-  price: string;
-  priceUnit: string;
-  image: string;
-};
+import type { Listing } from "../../listing/types/listing";
 
 type ServiceCardProps = {
-  service: Service;
+  listing: Listing;
 };
 
-export function ServiceCard({ service }: ServiceCardProps) {
+export function ServiceCard({ listing }: ServiceCardProps) {
+  const image = listing.images
+    ?.slice()
+    .sort((a, b) => a.sortOrder - b.sortOrder)[0];
+
+  const imageUrl = image ? getImageUrl(image.imageUrl) : null;
+
+  const price =
+    listing.pricingType === "FREE"
+      ? "Free"
+      : listing.rateAmount !== null
+        ? `${listing.currencyCode} ${listing.rateAmount.toFixed(2)}`
+        : "Contact provider";
+
   return (
     <Link
-      href={`/services/${service.id}`}
+      href={`/services/${listing.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors duration-200 hover:border-brand-line"
     >
       {/* Image */}
       <div className="relative h-[220px] shrink-0 overflow-hidden bg-brand-tint">
-        <img
-          src={service.image}
-          alt={service.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-        />
+        {imageUrl ? (
+          <img
+            src={imageUrl}
+            alt={listing.listingTitle}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-sm text-muted">
+            No image available
+          </div>
+        )}
 
         <span className="absolute left-4 top-4 rounded-md bg-surface/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink shadow-sm">
-          {service.category}
+          {listing.serviceType}
         </span>
       </div>
 
@@ -39,26 +49,48 @@ export function ServiceCard({ service }: ServiceCardProps) {
       <div className="flex flex-1 flex-col p-6">
         <div>
           <h3 className="font-serif text-xl font-medium leading-tight tracking-tight text-ink">
-            {service.title}
+            {listing.listingTitle}
           </h3>
 
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-faint" />
-            <span>{service.location}</span>
+            <span>{listing.city}</span>
           </div>
 
-          <p className="mt-4 line-clamp-2 text-sm leading-6 text-muted">
-            {service.description}
+          {listing.cuisine && (
+            <div className="mt-2 text-xs text-muted">{listing.cuisine}</div>
+          )}
+
+          <p className="mt-3 text-xs text-muted">
+            By{" "}
+            <span className="font-medium text-ink">{listing.listerName}</span>
           </p>
         </div>
 
+        {/* Footer */}
         <div className="mt-auto flex items-end justify-between gap-4 border-t border-line pt-5">
           <div>
             <span className="text-lg font-semibold tracking-tight text-ink">
-              {service.price}
+              {price}
             </span>
 
-            <span className="ml-1 text-xs text-muted">{service.priceUnit}</span>
+            {listing.pricingType === "PAID" && listing.availability && (
+              <span className="ml-1 text-xs text-muted">
+                · {formatAvailability(listing.availability)}
+              </span>
+            )}
+
+            {listing.averageRatingStar > 0 && (
+              <div className="mt-1 flex items-center gap-1 text-xs text-muted">
+                <Star className="h-3 w-3 fill-current" />
+
+                <span>{listing.averageRatingStar.toFixed(1)}</span>
+
+                {listing.totalReviewer > 0 && (
+                  <span>({listing.totalReviewer})</span>
+                )}
+              </div>
+            )}
           </div>
 
           <span
@@ -71,4 +103,28 @@ export function ServiceCard({ service }: ServiceCardProps) {
       </div>
     </Link>
   );
+}
+
+function getImageUrl(imageUrl: string) {
+  if (imageUrl.startsWith("http")) {
+    return imageUrl;
+  }
+
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`;
+}
+
+function formatAvailability(availability: Listing["availability"]) {
+  switch (availability) {
+    case "BOTH":
+      return "Weekdays & weekends";
+
+    case "WEEKDAYS":
+      return "Weekdays";
+
+    case "WEEKENDS":
+      return "Weekends";
+
+    default:
+      return availability;
+  }
 }

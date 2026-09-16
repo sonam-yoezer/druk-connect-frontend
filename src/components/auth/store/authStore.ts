@@ -2,14 +2,20 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { LoginUser } from "../types/login";
+import type { LoginResponse, LoginUser } from "../types/login";
 
 interface AuthState {
   user: LoginUser | null;
+
   accessToken: string | null;
+  refreshToken: string | null;
+
+  accessTokenExpiresAt: string | null;
+  refreshTokenExpiresAt: string | null;
+
   isAuthenticated: boolean;
 
-  setSession: (user: LoginUser, accessToken: string) => void;
+  setSession: (session: LoginResponse) => void;
   clearSession: () => void;
 }
 
@@ -18,12 +24,18 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       user: null,
       accessToken: null,
+      refreshToken: null,
+      accessTokenExpiresAt: null,
+      refreshTokenExpiresAt: null,
       isAuthenticated: false,
 
-      setSession: (user, accessToken) =>
+      setSession: (session) =>
         set({
-          user,
-          accessToken,
+          user: session.user,
+          accessToken: session.accessToken,
+          refreshToken: session.refreshToken,
+          accessTokenExpiresAt: session.accessTokenExpiresAt,
+          refreshTokenExpiresAt: session.refreshTokenExpiresAt,
           isAuthenticated: true,
         }),
 
@@ -31,6 +43,9 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: null,
           accessToken: null,
+          refreshToken: null,
+          accessTokenExpiresAt: null,
+          refreshTokenExpiresAt: null,
           isAuthenticated: false,
         }),
     }),
