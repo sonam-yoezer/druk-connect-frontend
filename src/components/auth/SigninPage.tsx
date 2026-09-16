@@ -27,9 +27,13 @@ export default function SignInPage() {
       },
       {
         onSuccess: (response) => {
-          setSession(response.user, response.accessToken);
+          setSession(response);
 
-          router.push("/buyer/dashboard");
+          if (response.user.accessType === "LISTER") {
+            router.push("/lister-dashboard");
+          } else {
+            router.push("/buyer/dashboard");
+          }
         },
 
         onError: (error) => {

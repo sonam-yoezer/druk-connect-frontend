@@ -4,17 +4,7 @@ import { Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ServiceCard } from "./ui/ServiceCard";
-
-const CATEGORIES = [
-  "All categories",
-  "Food",
-  "Transport",
-  "Home",
-  "Tutoring",
-  "Beauty",
-  "Repairs",
-  "Jobs",
-];
+import { useListings } from "../listing/hooks/useListings";
 
 const CITIES = [
   "All cities",
@@ -26,107 +16,51 @@ const CITIES = [
   "Canberra",
 ];
 
-const SERVICES = [
-  {
-    id: 1,
-    title: "Bhutanese Catering",
-    category: "Food",
-    location: "Melbourne, VIC",
-    description:
-      "Authentic Bhutanese meals prepared for gatherings, celebrations, and private events.",
-    price: "$25",
-    priceUnit: "per person",
-    image:
-      "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=900&q=80",
-  },
-  {
-    id: 2,
-    title: "Airport Pickup",
-    category: "Transport",
-    location: "Sydney, NSW",
-    description:
-      "Reliable airport pickup and drop-off for Bhutanese families and visitors.",
-    price: "$40",
-    priceUnit: "per trip",
-    image:
-      "https://images.unsplash.com/photo-1517840901100-8179e982acb7?w=900&q=80",
-  },
-  {
-    id: 3,
-    title: "Maths & Science Tutoring",
-    category: "Tutoring",
-    location: "Brisbane, QLD",
-    description:
-      "One-on-one tutoring for school students with flexible evening and weekend sessions.",
-    price: "$30",
-    priceUnit: "per hour",
-    image:
-      "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900&q=80",
-  },
-  {
-    id: 4,
-    title: "Home Cleaning",
-    category: "Home",
-    location: "Melbourne, VIC",
-    description:
-      "Friendly and reliable home cleaning services for apartments and houses.",
-    price: "$45",
-    priceUnit: "per hour",
-    image:
-      "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=900&q=80",
-  },
-  {
-    id: 5,
-    title: "Traditional Hair Styling",
-    category: "Beauty",
-    location: "Adelaide, SA",
-    description:
-      "Hair styling and preparation for celebrations, cultural events, and special occasions.",
-    price: "$35",
-    priceUnit: "per session",
-    image:
-      "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=900&q=80",
-  },
-  {
-    id: 6,
-    title: "Furniture Assembly",
-    category: "Repairs",
-    location: "Sydney, NSW",
-    description:
-      "Help with assembling furniture, shelves, desks, and other household items.",
-    price: "$40",
-    priceUnit: "per job",
-    image:
-      "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=900&q=80",
-  },
-];
-
 export default function ServicesPage() {
   const [category, setCategory] = useState("All categories");
   const [city, setCity] = useState("All cities");
   const [search, setSearch] = useState("");
 
-  const filteredServices = useMemo(() => {
+  const { data, isLoading, isError, error } = useListings(1, 10);
+
+  const listings = data?.listings ?? [];
+
+  /*
+   * Build the category options from the listings returned
+   * by the backend instead of maintaining another hardcoded
+   * list of service types.
+   */
+  const categories = useMemo(() => {
+    const serviceTypes = listings
+      .map((listing) => listing.serviceType)
+      .filter(Boolean);
+
+    return ["All categories", ...Array.from(new Set(serviceTypes))];
+  }, [listings]);
+
+  /*
+   * Filter the listings currently loaded from the API.
+   */
+  const filteredListings = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return SERVICES.filter((service) => {
+    return listings.filter((listing) => {
       const matchesCategory =
-        category === "All categories" || service.category === category;
+        category === "All categories" || listing.serviceType === category;
 
-      const serviceCity = service.location.split(",")[0];
-
-      const matchesCity = city === "All cities" || serviceCity === city;
+      const matchesCity = city === "All cities" || listing.city === city;
 
       const matchesSearch =
         !query ||
-        service.title.toLowerCase().includes(query) ||
-        service.description.toLowerCase().includes(query) ||
-        service.category.toLowerCase().includes(query) ||
-        service.location.toLowerCase().includes(query);
+        listing.listingTitle.toLowerCase().includes(query) ||
+        listing.serviceType.toLowerCase().includes(query) ||
+        listing.cuisine.toLowerCase().includes(query) ||
+        listing.city.toLowerCase().includes(query) ||
+        listing.listerName.toLowerCase().includes(query);
 
       return matchesCategory && matchesCity && matchesSearch;
     });
-  }, [category, city, search]);
+  }, [listings, category, city, search]);
 
   const hasFilters =
     category !== "All categories" ||
@@ -138,6 +72,108 @@ export default function ServicesPage() {
     setCity("All cities");
     setSearch("");
   };
+
+  /*
+   * Loading state
+   */
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <section className="relative overflow-hidden border-b border-line">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-40 -top-40 h-125 w-125 rounded-full bg-brand/5 blur-3xl" />
+
+            <div className="absolute -bottom-40 -right-40 h-112.5 w-112.5 rounded-full bg-jade/4 blur-3xl" />
+
+            <div
+              className="absolute inset-0 opacity-[0.02]"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)",
+                backgroundSize: "72px 72px",
+              }}
+            />
+          </div>
+
+          <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                Bhutanese marketplace in Australia
+              </p>
+
+              <h1 className="mt-5 font-serif text-[48px] font-medium leading-[0.98] tracking-[-0.045em] text-ink sm:text-[62px]">
+                Services for the <span className="text-brand">community.</span>
+              </h1>
+
+              <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
+                Find trusted people offering useful services across Australia.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8 lg:px-10">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={index}
+                className="overflow-hidden rounded-md border border-line bg-surface"
+              >
+                <div className="aspect-[4/3] animate-pulse bg-line/40" />
+
+                <div className="space-y-3 p-5">
+                  <div className="h-4 w-24 animate-pulse rounded bg-line/50" />
+
+                  <div className="h-6 w-3/4 animate-pulse rounded bg-line/50" />
+
+                  <div className="h-4 w-1/2 animate-pulse rounded bg-line/50" />
+
+                  <div className="h-4 w-1/3 animate-pulse rounded bg-line/50" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  /*
+   * Error state
+   */
+  if (isError) {
+    return (
+      <main className="min-h-screen bg-background">
+        <section className="relative overflow-hidden border-b border-line">
+          <div aria-hidden className="pointer-events-none absolute inset-0">
+            <div className="absolute -left-40 -top-40 h-125 w-125 rounded-full bg-brand/5 blur-3xl" />
+
+            <div className="absolute -bottom-40 -right-40 h-112.5 w-112.5 rounded-full bg-jade/4 blur-3xl" />
+          </div>
+
+          <div className="relative mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20 lg:px-10 lg:py-24">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
+                Bhutanese marketplace in Australia
+              </p>
+
+              <h1 className="mt-5 font-serif text-4xl font-medium tracking-[-0.04em] text-ink sm:text-5xl">
+                Services for the <span className="text-brand">community.</span>
+              </h1>
+
+              <p className="mt-5 text-sm leading-6 text-muted">
+                We couldn't load the community listings right now.
+              </p>
+
+              {error?.message && (
+                <p className="mt-2 text-xs text-muted">{error.message}</p>
+              )}
+            </div>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background">
@@ -187,7 +223,7 @@ export default function ServicesPage() {
               onChange={(event) => setCategory(event.target.value)}
               className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
             >
-              {CATEGORIES.map((item) => (
+              {categories.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -210,6 +246,7 @@ export default function ServicesPage() {
             {/* Search */}
             <div className="flex min-w-0 flex-1 items-center rounded-md border border-line bg-background px-3 focus-within:border-brand">
               <Search className="h-4 w-4 shrink-0 text-muted" />
+
               <input
                 type="search"
                 value={search}
@@ -227,6 +264,7 @@ export default function ServicesPage() {
               Search
             </button>
           </div>
+
           {/* Active filters */}
           {hasFilters && (
             <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
@@ -241,6 +279,7 @@ export default function ServicesPage() {
                   className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
                   {category}
+
                   <X className="h-3 w-3" />
                 </button>
               )}
@@ -252,6 +291,7 @@ export default function ServicesPage() {
                   className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
                   {city}
+
                   <X className="h-3 w-3" />
                 </button>
               )}
@@ -263,6 +303,7 @@ export default function ServicesPage() {
                   className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
                   <span className="max-w-40 truncate">"{search.trim()}"</span>
+
                   <X className="h-3 w-3 shrink-0" />
                 </button>
               )}
@@ -277,6 +318,7 @@ export default function ServicesPage() {
             </div>
           )}
         </div>
+
         {/* Results heading */}
         <div className="mt-10 flex items-end justify-between gap-6">
           <div>
@@ -291,16 +333,17 @@ export default function ServicesPage() {
 
           <p className="hidden text-sm text-muted sm:block">
             <span className="font-semibold text-ink">
-              {filteredServices.length}
+              {filteredListings.length}
             </span>{" "}
-            {filteredServices.length === 1 ? "listing" : "listings"}
+            {filteredListings.length === 1 ? "listing" : "listings"}
           </p>
         </div>
+
         {/* Results */}
-        {filteredServices.length > 0 ? (
+        {filteredListings.length > 0 ? (
           <div className="mt-8 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredServices.map((service) => (
-              <ServiceCard key={service.id} service={service} />
+            {filteredListings.map((listing) => (
+              <ServiceCard key={listing.id} listing={listing} />
             ))}
           </div>
         ) : (
@@ -316,12 +359,42 @@ export default function ServicesPage() {
               community listings.
             </p>
 
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-6 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {data && data.totalPages > 1 && (
+          <div className="mt-10 flex items-center justify-center gap-4">
             <button
               type="button"
-              onClick={clearFilters}
-              className="mt-6 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
+              disabled={!data.hasPrevious}
+              className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Clear filters
+              Previous
+            </button>
+
+            <span className="text-sm text-muted">
+              Page{" "}
+              <span className="font-semibold text-ink">{data.currentPage}</span>{" "}
+              of{" "}
+              <span className="font-semibold text-ink">{data.totalPages}</span>
+            </span>
+
+            <button
+              type="button"
+              disabled={!data.hasNext}
+              className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
             </button>
           </div>
         )}
