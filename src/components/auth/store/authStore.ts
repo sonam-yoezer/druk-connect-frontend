@@ -14,20 +14,26 @@ interface AuthState {
   refreshTokenExpiresAt: string | null;
 
   isAuthenticated: boolean;
+  hydrated: boolean;
 
   setSession: (session: LoginResponse) => void;
   clearSession: () => void;
+  setHydrated: (hydrated: boolean) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
+
       accessToken: null,
       refreshToken: null,
+
       accessTokenExpiresAt: null,
       refreshTokenExpiresAt: null,
+
       isAuthenticated: false,
+      hydrated: false,
 
       setSession: (session) =>
         set({
@@ -48,9 +54,15 @@ export const useAuthStore = create<AuthState>()(
           refreshTokenExpiresAt: null,
           isAuthenticated: false,
         }),
+
+      setHydrated: (hydrated) => set({ hydrated }),
     }),
     {
       name: "drukconnect-auth",
+
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
     },
   ),
 );

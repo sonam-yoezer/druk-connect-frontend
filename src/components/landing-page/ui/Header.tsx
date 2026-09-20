@@ -11,7 +11,7 @@ const NAV_LINKS = [
     label: "Browse services",
   },
   {
-    href: "/auth/signin",
+    href: "/auth/login",
     label: "Sign in",
   },
 ];

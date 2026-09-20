@@ -1,10 +1,10 @@
-import SignupPage from "@/src/components/auth/SignupPage";
+import SigninPage from "@/src/components/auth/SigninPage";
 import { RedirectIfAuthenticatedRoute } from "@/src/shared/routes/RedirectIfAuthenticatedRoute";
 
-export default function Signup() {
+export default function Signin() {
   return (
     <RedirectIfAuthenticatedRoute>
-      <SignupPage />
+      <SigninPage />
     </RedirectIfAuthenticatedRoute>
   );
 }

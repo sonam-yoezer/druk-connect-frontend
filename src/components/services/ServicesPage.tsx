@@ -1,10 +1,10 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { ServiceCard } from "./ui/ServiceCard";
-import { useListings } from "../listing/hooks/useListings";
+import { useSearchListings } from "../listing/hooks/useSearchListings";
 
 const CITIES = [
   "All cities",
@@ -16,73 +16,83 @@ const CITIES = [
   "Canberra",
 ];
 
+const CATEGORIES = [
+  "All categories",
+  "Food & Catering",
+  "Tax & Accounting",
+  "Moving & Relocation",
+  "Childcare",
+  "Tutoring",
+  "Automotive",
+  "Hair & Beauty",
+  "Resume & Career",
+  "Airport Pickup",
+];
+
 export default function ServicesPage() {
   const [category, setCategory] = useState("All categories");
   const [city, setCity] = useState("All cities");
-  const [search, setSearch] = useState("");
 
-  const { data, isLoading, isError, error } = useListings(1, 10);
+  const [search, setSearch] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  const { data, isLoading, isError, error, isFetching } = useSearchListings({
+    category: category === "All categories" ? undefined : category,
+    city: city === "All cities" ? undefined : city,
+    q: searchQuery || undefined,
+    page,
+    size: pageSize,
+  });
 
   const listings = data?.listings ?? [];
-
-  /*
-   * Build the category options from the listings returned
-   * by the backend instead of maintaining another hardcoded
-   * list of service types.
-   */
-  const categories = useMemo(() => {
-    const serviceTypes = listings
-      .map((listing) => listing.serviceType)
-      .filter(Boolean);
-
-    return ["All categories", ...Array.from(new Set(serviceTypes))];
-  }, [listings]);
-
-  /*
-   * Filter the listings currently loaded from the API.
-   */
-  const filteredListings = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return listings.filter((listing) => {
-      const matchesCategory =
-        category === "All categories" || listing.serviceType === category;
-
-      const matchesCity = city === "All cities" || listing.city === city;
-
-      const matchesSearch =
-        !query ||
-        listing.listingTitle.toLowerCase().includes(query) ||
-        listing.serviceType.toLowerCase().includes(query) ||
-        listing.cuisine.toLowerCase().includes(query) ||
-        listing.city.toLowerCase().includes(query) ||
-        listing.listerName.toLowerCase().includes(query);
-
-      return matchesCategory && matchesCity && matchesSearch;
-    });
-  }, [listings, category, city, search]);
 
   const hasFilters =
     category !== "All categories" ||
     city !== "All cities" ||
-    search.trim() !== "";
+    searchQuery !== "";
 
   const clearFilters = () => {
     setCategory("All categories");
     setCity("All cities");
     setSearch("");
+    setSearchQuery("");
+    setPage(1);
   };
 
-  /*
-   * Loading state
-   */
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    setCategory(event.target.value);
+    setPage(1);
+  };
+
+  const handleCityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setCity(event.target.value);
+    setPage(1);
+  };
+
+  const handleSearch = () => {
+    setSearchQuery(search.trim());
+    setPage(1);
+  };
+
+  const handleSearchKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (event.key === "Enter") {
+      handleSearch();
+    }
+  };
+
   if (isLoading) {
     return (
       <main className="min-h-screen bg-background">
         <section className="relative overflow-hidden border-b border-line">
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="absolute -left-40 -top-40 h-125 w-125 rounded-full bg-brand/5 blur-3xl" />
-
             <div className="absolute -bottom-40 -right-40 h-112.5 w-112.5 rounded-full bg-jade/4 blur-3xl" />
 
             <div
@@ -102,7 +112,7 @@ export default function ServicesPage() {
               </p>
 
               <h1 className="mt-5 font-serif text-[48px] font-medium leading-[0.98] tracking-[-0.045em] text-ink sm:text-[62px]">
-                Services for the <span className="text-brand">community.</span>
+                Services for <span className="text-brand">the community.</span>
               </h1>
 
               <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
@@ -123,11 +133,8 @@ export default function ServicesPage() {
 
                 <div className="space-y-3 p-5">
                   <div className="h-4 w-24 animate-pulse rounded bg-line/50" />
-
                   <div className="h-6 w-3/4 animate-pulse rounded bg-line/50" />
-
                   <div className="h-4 w-1/2 animate-pulse rounded bg-line/50" />
-
                   <div className="h-4 w-1/3 animate-pulse rounded bg-line/50" />
                 </div>
               </div>
@@ -138,16 +145,12 @@ export default function ServicesPage() {
     );
   }
 
-  /*
-   * Error state
-   */
   if (isError) {
     return (
       <main className="min-h-screen bg-background">
         <section className="relative overflow-hidden border-b border-line">
           <div aria-hidden className="pointer-events-none absolute inset-0">
             <div className="absolute -left-40 -top-40 h-125 w-125 rounded-full bg-brand/5 blur-3xl" />
-
             <div className="absolute -bottom-40 -right-40 h-112.5 w-112.5 rounded-full bg-jade/4 blur-3xl" />
           </div>
 
@@ -158,7 +161,7 @@ export default function ServicesPage() {
               </p>
 
               <h1 className="mt-5 font-serif text-4xl font-medium tracking-[-0.04em] text-ink sm:text-5xl">
-                Services for the <span className="text-brand">community.</span>
+                Services for <span className="text-brand">the community.</span>
               </h1>
 
               <p className="mt-5 text-sm leading-6 text-muted">
@@ -202,7 +205,7 @@ export default function ServicesPage() {
             </p>
 
             <h1 className="mt-5 font-serif text-[48px] font-medium leading-[0.98] tracking-[-0.045em] text-ink sm:text-[62px]">
-              Services for the <span className="text-brand">community.</span>
+              Services for <span className="text-brand">the community.</span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-xl text-base leading-7 text-muted sm:text-lg sm:leading-8">
@@ -220,10 +223,10 @@ export default function ServicesPage() {
             {/* Category */}
             <select
               value={category}
-              onChange={(event) => setCategory(event.target.value)}
+              onChange={handleCategoryChange}
               className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
             >
-              {categories.map((item) => (
+              {CATEGORIES.map((item) => (
                 <option key={item} value={item}>
                   {item}
                 </option>
@@ -233,7 +236,7 @@ export default function ServicesPage() {
             {/* City */}
             <select
               value={city}
-              onChange={(event) => setCity(event.target.value)}
+              onChange={handleCityChange}
               className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
             >
               {CITIES.map((item) => (
@@ -251,6 +254,7 @@ export default function ServicesPage() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
                 placeholder="Search services, providers..."
                 className="h-11 min-w-0 flex-1 bg-transparent px-3 text-sm text-ink outline-none placeholder:text-faint"
               />
@@ -259,9 +263,11 @@ export default function ServicesPage() {
             {/* Search button */}
             <button
               type="button"
-              className="h-11 shrink-0 rounded-md bg-brand px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+              onClick={handleSearch}
+              disabled={isFetching}
+              className="h-11 shrink-0 rounded-md bg-brand px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Search
+              {isFetching ? "Searching..." : "Search"}
             </button>
           </div>
 
@@ -275,11 +281,13 @@ export default function ServicesPage() {
               {category !== "All categories" && (
                 <button
                   type="button"
-                  onClick={() => setCategory("All categories")}
+                  onClick={() => {
+                    setCategory("All categories");
+                    setPage(1);
+                  }}
                   className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
                   {category}
-
                   <X className="h-3 w-3" />
                 </button>
               )}
@@ -287,22 +295,28 @@ export default function ServicesPage() {
               {city !== "All cities" && (
                 <button
                   type="button"
-                  onClick={() => setCity("All cities")}
+                  onClick={() => {
+                    setCity("All cities");
+                    setPage(1);
+                  }}
                   className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
                   {city}
-
                   <X className="h-3 w-3" />
                 </button>
               )}
 
-              {search.trim() && (
+              {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    setSearchQuery("");
+                    setPage(1);
+                  }}
                   className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
                 >
-                  <span className="max-w-40 truncate">"{search.trim()}"</span>
+                  <span className="max-w-40 truncate">"{searchQuery}"</span>
 
                   <X className="h-3 w-3 shrink-0" />
                 </button>
@@ -333,18 +347,26 @@ export default function ServicesPage() {
 
           <p className="hidden text-sm text-muted sm:block">
             <span className="font-semibold text-ink">
-              {filteredListings.length}
+              {data?.totalElements ?? 0}
             </span>{" "}
-            {filteredListings.length === 1 ? "listing" : "listings"}
+            {data?.totalElements === 1 ? "listing" : "listings"}
           </p>
         </div>
 
         {/* Results */}
-        {filteredListings.length > 0 ? (
-          <div className="mt-8 grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredListings.map((listing) => (
-              <ServiceCard key={listing.id} listing={listing} />
-            ))}
+        {listings.length > 0 ? (
+          <div className="relative mt-8">
+            {isFetching && (
+              <div className="absolute inset-x-0 -top-4 h-0.5 overflow-hidden rounded-full bg-brand/20">
+                <div className="h-full w-1/3 animate-pulse bg-brand" />
+              </div>
+            )}
+
+            <div className="grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {listings.map((listing) => (
+                <ServiceCard key={listing.id} listing={listing} />
+              ))}
+            </div>
           </div>
         ) : (
           <div className="mt-8 border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
@@ -376,7 +398,8 @@ export default function ServicesPage() {
           <div className="mt-10 flex items-center justify-center gap-4">
             <button
               type="button"
-              disabled={!data.hasPrevious}
+              disabled={!data.hasPrevious || isFetching}
+              onClick={() => setPage((current) => current - 1)}
               className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
             >
               Previous
@@ -391,7 +414,8 @@ export default function ServicesPage() {
 
             <button
               type="button"
-              disabled={!data.hasNext}
+              disabled={!data.hasNext || isFetching}
+              onClick={() => setPage((current) => current + 1)}
               className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next

@@ -20,6 +20,8 @@ import {
   ListingImage,
   ListingReview,
 } from "../../listing/types/listing";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../auth/store/authStore";
 
 type ServiceDetailProps = {
   listing: ListingDetails;
@@ -373,6 +375,24 @@ function PriceBlock({ listing }: { listing: ListingDetails }) {
 function ProviderCard({ listing }: { listing: ListingDetails }) {
   const { lister } = listing;
 
+  const router = useRouter();
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+
+  const handleWhatsAppClick = () => {
+    if (!isAuthenticated) {
+      const redirectPath = `/services/${listing.id}`;
+
+      router.push(`/auth/signup?redirect=${encodeURIComponent(redirectPath)}`);
+
+      return;
+    }
+
+    if (lister.whatsappLink) {
+      window.open(lister.whatsappLink, "_blank", "noopener,noreferrer");
+    }
+  };
+
   return (
     <div className="rounded-md border border-line bg-surface p-6">
       {/* Provider */}
@@ -436,15 +456,14 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
 
       {/* WhatsApp */}
       {lister.whatsappLink && (
-        <a
-          href={lister.whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-12 items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand"
+        <button
+          type="button"
+          onClick={handleWhatsAppClick}
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-md bg-ink px-4 text-sm font-semibold text-white transition-colors duration-200 hover:bg-brand"
         >
           <MessageCircle className="h-4 w-4" />
           Message on WhatsApp
-        </a>
+        </button>
       )}
 
       {/* Secondary contact */}

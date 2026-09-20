@@ -11,14 +11,15 @@ type ChooseRoleProps = {
 const ROLES = [
   {
     role: "BUYER" as const,
-    title: "I'm a Buyer",
-    description: "Discover trusted products and services from the community.",
+    title: "Sign up to vouch",
+    description:
+      "Vouch for trusted listers and help build trust in the community.",
     action: "Continue as Buyer",
     icon: ShoppingBag,
   },
   {
     role: "LISTER" as const,
-    title: "I'm a Lister",
+    title: "Sign up to list",
     description:
       "List your products and services and build trust with the community.",
     action: "Become a Lister",
@@ -85,7 +86,7 @@ export function ChooseRole({ onSelect }: ChooseRoleProps) {
       <p className="mt-8 text-center text-sm text-muted">
         Already have an account?{" "}
         <a
-          href="/auth/signin"
+          href="/auth/login"
           className="font-semibold text-brand transition-colors hover:text-brand-dark"
         >
           Sign in

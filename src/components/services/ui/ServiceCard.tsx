@@ -1,29 +1,29 @@
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Star } from "lucide-react";
 
-import type { Listing } from "../../listing/types/listing";
+import type { ListingSearchResult } from "../../listing/types/listing";
 
 type ServiceCardProps = {
-  listing: Listing;
+  listing: ListingSearchResult;
+  hrefBase?: string;
 };
 
-export function ServiceCard({ listing }: ServiceCardProps) {
-  const image = listing.images
-    ?.slice()
-    .sort((a, b) => a.sortOrder - b.sortOrder)[0];
+export function ServiceCard({ listing, hrefBase }: ServiceCardProps) {
+  const image = [...(listing.images ?? [])].sort(
+    (a, b) => a.sortOrder - b.sortOrder,
+  )[0];
 
   const imageUrl = image ? getImageUrl(image.imageUrl) : null;
 
-  const price =
-    listing.pricingType === "FREE"
-      ? "Free"
-      : listing.rateAmount !== null
-        ? `${listing.currencyCode} ${listing.rateAmount.toFixed(2)}`
-        : "Contact provider";
+  const price = getPriceLabel(
+    listing.pricingType,
+    listing.rateAmount,
+    listing.currencyCode,
+  );
 
   return (
     <Link
-      href={`/services/${listing.id}`}
+      href={`${hrefBase}/${listing.id}`}
       className="group flex h-full flex-col overflow-hidden rounded-md border border-line bg-surface transition-colors duration-200 hover:border-brand-line"
     >
       {/* Image */}
@@ -41,7 +41,7 @@ export function ServiceCard({ listing }: ServiceCardProps) {
         )}
 
         <span className="absolute left-4 top-4 rounded-md bg-surface/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-ink shadow-sm">
-          {listing.serviceType}
+          {listing.listingCategory}
         </span>
       </div>
 
@@ -54,6 +54,7 @@ export function ServiceCard({ listing }: ServiceCardProps) {
 
           <div className="mt-3 flex items-center gap-1.5 text-xs text-muted">
             <MapPin className="h-3.5 w-3.5 shrink-0 text-faint" />
+
             <span>{listing.city}</span>
           </div>
 
@@ -94,8 +95,8 @@ export function ServiceCard({ listing }: ServiceCardProps) {
           </div>
 
           <span
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-strong text-ink transition-colors group-hover:border-brand group-hover:text-brand"
             aria-hidden="true"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-line-strong text-ink transition-colors group-hover:border-brand group-hover:text-brand"
           >
             <ArrowUpRight className="h-4 w-4" />
           </span>
@@ -113,7 +114,23 @@ function getImageUrl(imageUrl: string) {
   return `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`;
 }
 
-function formatAvailability(availability: Listing["availability"]) {
+function getPriceLabel(
+  pricingType: string,
+  rateAmount: number | null,
+  currencyCode: string,
+) {
+  if (pricingType === "FREE") {
+    return "Free";
+  }
+
+  if (rateAmount !== null) {
+    return `${currencyCode} ${rateAmount.toFixed(2)}`;
+  }
+
+  return "Contact provider";
+}
+
+function formatAvailability(availability: ListingSearchResult["availability"]) {
   switch (availability) {
     case "BOTH":
       return "Weekdays & weekends";

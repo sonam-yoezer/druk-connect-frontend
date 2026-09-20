@@ -7,6 +7,7 @@ import { SignInForm } from "./ui/sign-in/SignInForm";
 import { SignInBrandPanel } from "./ui/sign-in/SignInBrandPanel";
 import { useLogin } from "./hooks/useLogin";
 import { useAuthStore } from "./store/authStore";
+import { getDashboardRoute } from "@/src/shared/routes/getDashboardRoute";
 
 export default function SignInPage() {
   const router = useRouter();
@@ -29,11 +30,7 @@ export default function SignInPage() {
         onSuccess: (response) => {
           setSession(response);
 
-          if (response.user.accessType === "LISTER") {
-            router.push("/lister-dashboard");
-          } else {
-            router.push("/buyer/dashboard");
-          }
+          router.push(getDashboardRoute(response.user));
         },
 
         onError: (error) => {

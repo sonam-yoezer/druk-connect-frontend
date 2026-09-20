@@ -1,5 +1,5 @@
+import { DashboardSidebar } from "@/src/components/admin-dashboard/ui/DashboardSidebar";
 import { DashboardHeader } from "@/src/components/lister-dashboard/ui/DashboardHeader";
-import { DashboardSidebar } from "@/src/components/lister-dashboard/ui/DashboardSidebar";
 import { ProtectedRoute } from "@/src/shared/routes/ProtectedRoute";
 
 export default function DashboardLayout({
@@ -8,7 +8,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ProtectedRoute allowedAccessTypes={["LISTER"]}>
+    <ProtectedRoute allowedRoles={["ADMIN"]}>
       <div className="min-h-screen bg-background text-ink">
         <DashboardSidebar />
 

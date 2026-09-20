@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  BarChart3,
-  Bell,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
+  Search,
   Settings,
-  Store,
+  ShieldCheck,
+  Star,
   UserRound,
   Users,
 } from "lucide-react";
@@ -17,40 +18,45 @@ import { useAuthStore } from "../../auth/store/authStore";
 const NAVIGATION = [
   {
     label: "Dashboard",
-    href: "/lister-dashboard",
+    href: "/admin-dashboard",
     icon: LayoutDashboard,
   },
+  //   {
+  //     label: "Users",
+  //     href: "/admin-dashboard/users",
+  //     icon: Users,
+  //   },
+  //   {
+  //     label: "Listings",
+  //     href: "/admin-dashboard/listings",
+  //     icon: Search,
+  //   },
   {
-    label: "My Listings",
-    href: "/lister-dashboard/listings",
-    icon: Store,
+    label: "Reviews",
+    href: "/admin-dashboard/reviews",
+    icon: Star,
   },
-  // {
-  //   label: "Requests",
-  //   href: "/lister-dashboard/requests",
-  //   icon: Bell,
-  // },
-  // {
-  //   label: "Insights",
-  //   href: "/lister-dashboard/insights",
-  //   icon: BarChart3,
-  // },
-  {
-    label: "Vouches",
-    href: "/lister-dashboard/vouches",
-    icon: Users,
-  },
+  //   {
+  //     label: "Vouches",
+  //     href: "/admin-dashboard/vouches",
+  //     icon: ShieldCheck,
+  //   },
+  //   {
+  //     label: "Reports",
+  //     href: "/admin-dashboard/reports",
+  //     icon: MessageSquare,
+  //   },
 ];
 
 const SECONDARY_NAVIGATION = [
   {
     label: "Profile",
-    href: "/lister-dashboard/profile",
+    href: "/admin-dashboard/profile",
     icon: UserRound,
   },
   {
     label: "Settings",
-    href: "/lister-dashboard/settings",
+    href: "/admin-dashboard/settings",
     icon: Settings,
   },
 ];
@@ -60,19 +66,26 @@ export function DashboardSidebar() {
   const router = useRouter();
 
   const clearSession = useAuthStore((state) => state.clearSession);
+  const user = useAuthStore((state) => state.user);
 
   const handleLogout = () => {
     clearSession();
     router.replace("/");
   };
 
+  const userName =
+    [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Admin";
+
+  const userInitial = user?.firstName?.charAt(0).toUpperCase() || "A";
+
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-line bg-surface lg:flex lg:flex-col">
+      {/* Header */}
       <div className="flex h-16 items-center border-b border-line px-6">
         <Link
-          href="/lister-dashboard"
+          href="/admin-dashboard"
           className="flex items-center gap-2.5"
-          aria-label="DrukConnect dashboard"
+          aria-label="DrukConnect admin dashboard"
         >
           <LogoMark />
 
@@ -82,6 +95,7 @@ export function DashboardSidebar() {
         </Link>
       </div>
 
+      {/* Navigation */}
       <div className="flex flex-1 flex-col px-4 py-6">
         <nav className="space-y-1">
           {NAVIGATION.map((item) => (
@@ -105,18 +119,19 @@ export function DashboardSidebar() {
           ))}
         </nav>
 
+        {/* Admin User */}
         <div className="mt-auto border-t border-line pt-5">
           <div className="flex items-center gap-3 px-2">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-tint text-sm font-semibold text-brand">
-              T
+              {userInitial}
             </div>
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink">
-                Tashi Wangchuk
+                {userName}
               </p>
 
-              <p className="text-xs text-muted">Lister</p>
+              <p className="text-xs text-muted">Administrator</p>
             </div>
           </div>
 
@@ -126,6 +141,7 @@ export function DashboardSidebar() {
             className="mt-4 flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-background hover:text-ink"
           >
             <LogOut className="h-4 w-4 shrink-0" />
+
             <span>Log out</span>
           </button>
         </div>
@@ -155,13 +171,14 @@ function DashboardNavItem({
       }`}
     >
       <Icon className="h-4 w-4 shrink-0" />
+
       <span>{label}</span>
     </Link>
   );
 }
 
 function isActivePath(pathname: string, href: string) {
-  if (href === "/lister-dashboard") {
+  if (href === "/admin-dashboard") {
     return pathname === href;
   }
 

@@ -56,8 +56,35 @@ export type Listing = {
   updatedAt: string;
 };
 
+export type ListingSearchResult = {
+  id: string;
+  listingTitle: string;
+  listingCategory: string;
+  city: string;
+  cuisine: string;
+  serviceType: string;
+  availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  pricingType: "PAID" | "FREE";
+  rateAmount: number | null;
+  currencyCode: string;
+  views: number;
+  images: ListingImage[];
+  totalReviewer: number;
+  averageRating: number;
+  averageRatingStar: number;
+  listerName: string;
+};
+
+export type SearchListingsParams = {
+  category?: string;
+  city?: string;
+  q?: string;
+  page?: number;
+  size?: number;
+};
+
 export type ListingsResponse = {
-  listings: Listing[];
+  listings: ListingSearchResult[];
   currentPage: number;
   pageSize: number;
   totalElements: number;
