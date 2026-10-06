@@ -1,9 +1,9 @@
-import type { LoginResponse } from "../types/login";
+import type { AuthSession } from "../types/login";
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 export async function refreshToken(
   refreshToken: string,
-): Promise<LoginResponse> {
+): Promise<AuthSession> {
   const response = await fetch(`${API_URL}/api/v1/auth/refresh`, {
     method: "POST",
     headers: {
