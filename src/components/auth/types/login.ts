@@ -13,7 +13,7 @@ export interface LoginUser {
   roles: string[];
 }
 
-export interface LoginResponse {
+export interface AuthSession {
   tokenType: string;
   accessToken: string;
   refreshToken: string;
@@ -23,3 +23,20 @@ export interface LoginResponse {
   refreshTokenExpiresAt: string;
   user: LoginUser;
 }
+
+export type LoginResponse = {
+  loginStatus: "AUTHENTICATED";
+  tokens: AuthSession;
+  user?: LoginUser;
+  message: string;
+} | {
+  loginStatus: "VOUCH_REQUIRED";
+  tokens: null;
+  vouchRecoveryToken: string;
+  vouchRecoveryTokenExpiresIn: number;
+  activeVouchCount: number;
+  requiredVouchCount: number;
+  vouchesNeeded: number;
+  user: LoginUser;
+  message: string;
+};

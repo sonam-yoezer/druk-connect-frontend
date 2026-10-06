@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { LoginResponse, LoginUser } from "../types/login";
+import type { AuthSession, LoginUser } from "../types/login";
 
 interface AuthState {
   user: LoginUser | null;
@@ -16,7 +16,7 @@ interface AuthState {
   isAuthenticated: boolean;
   hydrated: boolean;
 
-  setSession: (session: LoginResponse) => void;
+  setSession: (session: AuthSession) => void;
   clearSession: () => void;
   setHydrated: (hydrated: boolean) => void;
 }

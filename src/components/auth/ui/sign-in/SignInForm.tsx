@@ -169,6 +169,10 @@ export function SignInForm({
           </Button>
 
           <p className="mt-5 text-center text-[13.5px] text-faint">
+            Don&apos;t have enough vouch?{" "}
+            <Link href="/auth/vouch-recovery" className="font-medium text-ink underline underline-offset-4">Click here.</Link>
+          </p>
+          <p className="mt-5 text-center text-[13.5px] text-faint">
             New to DrukConnect?{" "}
             <Link
               href="/signup"

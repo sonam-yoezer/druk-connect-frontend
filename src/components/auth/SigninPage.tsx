@@ -1,5 +1,6 @@
 "use client";
 
+import { useVouchRecoveryStore } from "./store/vouchRecoveryStore";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +13,8 @@ import { getDashboardRoute } from "@/src/shared/routes/getDashboardRoute";
 export default function SignInPage() {
   const router = useRouter();
 
+  const completionNotice = useVouchRecoveryStore((state) => state.completionNotice);
+
   const [serverError, setServerError] = useState("");
 
   const { mutate: login, isPending } = useLogin();
@@ -20,6 +23,7 @@ export default function SignInPage() {
 
   const handleSignIn = (data: { email: string; password: string }) => {
     setServerError("");
+    useVouchRecoveryStore.getState().dismissCompletionNotice();
 
     login(
       {
@@ -28,9 +32,21 @@ export default function SignInPage() {
       },
       {
         onSuccess: (response) => {
-          setSession(response);
+          if (response.loginStatus === "VOUCH_REQUIRED") {
+            useAuthStore.getState().clearSession();
+            useVouchRecoveryStore.getState().start(response);
+            setServerError(response.message);
+            return;
+          }
+          if (response.loginStatus !== "AUTHENTICATED" || !response.tokens?.accessToken || !response.tokens?.refreshToken) {
+            useAuthStore.getState().clearSession();
+            setServerError("Unable to sign in: invalid login response.");
+            return;
+          }
+          useVouchRecoveryStore.getState().clear();
+          setSession(response.tokens);
 
-          router.push(getDashboardRoute(response.user));
+          router.push(getDashboardRoute(response.tokens.user));
         },
 
         onError: (error) => {
@@ -50,6 +66,11 @@ export default function SignInPage() {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex min-h-full justify-center px-6 pb-16 pt-8 sm:px-10 lg:px-12 lg:py-12">
             <div className="w-full max-w-110 lg:my-auto">
+              {completionNotice && (
+                <p role="status" className="mb-6 rounded-lg bg-brand-tint p-4 text-brand">
+                  You have now met the minimum required vouches. Please sign in to restore full access.
+                </p>
+              )}
               <SignInForm
                 onSubmit={handleSignIn}
                 isLoading={isPending}
