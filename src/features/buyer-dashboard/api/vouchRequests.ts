@@ -1,38 +1,21 @@
+import { apiFetch } from "@/src/lib/api/client";
 import { useAuthStore } from "../../auth/store/authStore";
-import type { IncomingVouchRequest } from "../types/vouchRequest";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
+import type {
+  IncomingVouchRequest,
+  RespondVouchRequestResponse,
+} from "../types/vouchRequest";
 
 export async function getIncomingVouchRequests(): Promise<
   IncomingVouchRequest[]
 > {
-  const accessToken = useAuthStore.getState().accessToken;
-
-  if (!accessToken) {
-    throw new Error("You are not authenticated.");
-  }
-
-  const response = await fetch(
-    `${BACKEND_URL}/api/v1/vouch-requests/me/incoming`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-    },
-  );
-
-  const responseText = await response.text();
+  const response = await apiFetch("/api/v1/vouch-requests/me/incoming", {
+    method: "GET",
+  });
 
   if (!response.ok) {
-    throw new Error(responseText || "Unable to load incoming vouch requests.");
-  }
+    const error = await response.text();
 
-  return JSON.parse(responseText);
-
-  if (!response.ok) {
-    throw new Error("Unable to load incoming vouch requests.");
+    throw new Error(error || "Unable to load incoming vouch requests.");
   }
 
   return response.json();

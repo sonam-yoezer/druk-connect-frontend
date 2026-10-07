@@ -3,7 +3,7 @@ import { IncomingVouchRequests } from "@/src/features/buyer-dashboard/ui/Incomin
 export default function RequestsPage() {
   return (
     <div className="mx-auto w-full max-w-5xl">
-      <div>
+      <header>
         <p className="text-sm font-medium text-muted">Your requests</p>
 
         <h1 className="mt-1 font-serif text-3xl font-medium tracking-tight text-ink sm:text-4xl">
@@ -11,11 +11,11 @@ export default function RequestsPage() {
         </h1>
 
         <p className="mt-3 max-w-xl text-sm leading-6 text-muted">
-          Members who have asked you to vouch for them will appear here.
+          Review requests from members who would like you to vouch for them.
         </p>
-      </div>
+      </header>
 
-      <section className="mt-8">
+      <section className="mt-8" aria-label="Vouch requests">
         <IncomingVouchRequests />
       </section>
     </div>

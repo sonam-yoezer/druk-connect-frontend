@@ -1,34 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Clock3, Mail, UserRound, X } from "lucide-react";
+import { AlertCircle, Inbox } from "lucide-react";
 
 import { useRespondToVouchRequest } from "../hooks/useRespondToVouchRequest";
 import { useIncomingVouchRequests } from "../hooks/useIncomingVouchRequests";
+import VouchRequestCard from "./VouchRequestCard";
+import VouchRequestSkeleton from "./VouchRequestSkeleton";
 
-function formatRequestedAt(date: string) {
-  return new Intl.DateTimeFormat("en", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(date));
-}
+type RespondingState = {
+  requestId: string;
+  action: "accept" | "decline";
+} | null;
 
 export function IncomingVouchRequests() {
-  const { data: requests, isLoading, isError } = useIncomingVouchRequests();
+  const {
+    data: requests,
+    isLoading,
+    isError,
+    refetch,
+  } = useIncomingVouchRequests();
 
   const { mutate: respondToVouchRequest } = useRespondToVouchRequest();
 
-  const [respondingRequestId, setRespondingRequestId] = useState<string | null>(
-    null,
-  );
-
-  const [respondingAction, setRespondingAction] = useState<
-    "accept" | "decline" | null
-  >(null);
+  const [responding, setResponding] = useState<RespondingState>(null);
 
   const handleRespond = (requestId: string, accept: boolean) => {
-    setRespondingRequestId(requestId);
-    setRespondingAction(accept ? "accept" : "decline");
+    const action = accept ? "accept" : "decline";
+
+    setResponding({
+      requestId,
+      action,
+    });
 
     respondToVouchRequest(
       {
@@ -37,45 +40,47 @@ export function IncomingVouchRequests() {
       },
       {
         onSettled: () => {
-          setRespondingRequestId(null);
-          setRespondingAction(null);
+          setResponding(null);
         },
       },
     );
   };
 
   if (isLoading) {
-    return (
-      <div className="space-y-3">
-        {[1, 2].map((item) => (
-          <div
-            key={item}
-            className="animate-pulse rounded-2xl border border-line bg-surface p-5"
-          >
-            <div className="h-5 w-40 rounded bg-line" />
-            <div className="mt-3 h-4 w-56 rounded bg-line" />
-            <div className="mt-5 h-16 rounded-xl bg-line" />
-          </div>
-        ))}
-      </div>
-    );
+    return <VouchRequestSkeleton />;
   }
 
   if (isError) {
     return (
-      <div className="rounded-2xl border border-line bg-surface p-8 text-center">
-        <p className="text-sm font-medium text-ink">Unable to load requests</p>
+      <div className="rounded-2xl border border-line bg-surface px-6 py-10 text-center">
+        <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-red-50 text-red-600">
+          <AlertCircle className="h-5 w-5" />
+        </div>
 
-        <p className="mt-1 text-sm text-muted">Please try again in a moment.</p>
+        <h2 className="mt-4 text-sm font-semibold text-ink">
+          Unable to load vouch requests
+        </h2>
+
+        <p className="mx-auto mt-1.5 max-w-sm text-sm leading-6 text-muted">
+          Something went wrong while loading your requests. Please try again.
+        </p>
+
+        <button
+          type="button"
+          onClick={() => refetch()}
+          className="mt-5 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-background"
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
   if (!requests || requests.length === 0) {
     return (
-      <div className="rounded-2xl border border-line bg-surface p-10 text-center">
+      <div className="rounded-2xl border border-line bg-surface px-6 py-12 text-center">
         <div className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-background text-muted">
-          <UserRound className="h-5 w-5" />
+          <Inbox className="h-5 w-5" />
         </div>
 
         <h2 className="mt-4 text-sm font-semibold text-ink">
@@ -90,100 +95,41 @@ export function IncomingVouchRequests() {
     );
   }
 
+  const pendingRequests = requests.filter(
+    (request) => request.status.trim().toUpperCase() === "PENDING",
+  );
+
   return (
-    <div className="space-y-3">
-      {requests.map((request) => {
-        const fullName = `${request.requesterFirstName} ${request.requesterLastName}`;
+    <div className="space-y-4">
+      {pendingRequests.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-line bg-surface px-4 py-3">
+          <div>
+            <p className="text-sm font-medium text-ink">
+              {pendingRequests.length} pending{" "}
+              {pendingRequests.length === 1 ? "request" : "requests"}
+            </p>
 
-        const isPending = request.status.trim().toUpperCase() === "PENDING";
+            <p className="mt-0.5 text-xs text-muted">
+              Review these requests and decide whether you can vouch for them.
+            </p>
+          </div>
 
-        const isResponding = respondingRequestId === request.requestId;
+          <span className="grid h-8 min-w-8 place-items-center rounded-full bg-brand-tint px-2 text-xs font-semibold text-brand">
+            {pendingRequests.length}
+          </span>
+        </div>
+      )}
 
-        const isAccepting = isResponding && respondingAction === "accept";
-
-        const isDeclining = isResponding && respondingAction === "decline";
-
-        return (
-          <article
+      <div className="space-y-3">
+        {requests.map((request) => (
+          <VouchRequestCard
             key={request.requestId}
-            className="rounded-2xl border border-line bg-surface p-5"
-          >
-            {/* Requester */}
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-tint text-sm font-semibold text-brand">
-                  {request.requesterFirstName.charAt(0).toUpperCase()}
-                </div>
-
-                <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold text-ink">
-                    {fullName}
-                  </h2>
-
-                  <div className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-                    <Mail className="h-3.5 w-3.5" />
-
-                    <span className="truncate">{request.requesterEmail}</span>
-                  </div>
-                </div>
-              </div>
-
-              <span className="shrink-0 rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-muted">
-                {request.status}
-              </span>
-            </div>
-
-            {/* Message */}
-            {request.message && (
-              <div className="mt-4 rounded-xl bg-background p-4">
-                <p className="text-sm leading-6 text-ink">
-                  “{request.message}”
-                </p>
-              </div>
-            )}
-
-            {/* Footer */}
-            <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-1.5 text-xs text-muted">
-                <Clock3 className="h-3.5 w-3.5" />
-
-                <span>Requested {formatRequestedAt(request.requestedAt)}</span>
-              </div>
-
-              {/* Actions */}
-              {isPending && (
-                <div className="flex w-full gap-2 sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleRespond(request.requestId, false)}
-                    disabled={isResponding}
-                    className="flex-1 rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-background disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                  >
-                    <span className="inline-flex items-center justify-center gap-2">
-                      <X className="h-4 w-4" />
-
-                      {isDeclining ? "Declining..." : "Decline"}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleRespond(request.requestId, true)}
-                    disabled={isResponding}
-                    className="flex-1 rounded-xl border border-brand bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none"
-                  >
-                    <span className="inline-flex items-center justify-center gap-2">
-                      <Check className="h-4 w-4" />
-
-                      {isAccepting ? "Accepting..." : "Accept"}
-                    </span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </article>
-        );
-      })}
+            request={request}
+            responding={responding}
+            onRespond={handleRespond}
+          />
+        ))}
+      </div>
     </div>
   );
 }
