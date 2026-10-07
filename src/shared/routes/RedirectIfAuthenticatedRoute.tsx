@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/src/components/auth/store/authStore";
+import { useAuthStore } from "@/src/features/auth/store/authStore";
 import { getDashboardRoute } from "./getDashboardRoute";
 
 interface RedirectIfAuthenticatedRouteProps {

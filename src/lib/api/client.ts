@@ -1,5 +1,5 @@
-import { refreshToken } from "@/src/components/auth/api/refreshToken";
-import { useAuthStore } from "@/src/components/auth/store/authStore";
+import { refreshToken } from "@/src/features/auth/api/refreshToken";
+import { useAuthStore } from "@/src/features/auth/store/authStore";
 
 const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 

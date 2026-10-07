@@ -1,4 +1,4 @@
-import { Header } from "@/src/components/landing-page/ui/Header";
+import { Header } from "@/src/features/landing-page/ui/Header";
 
 export default function PublicLayout({
   children,

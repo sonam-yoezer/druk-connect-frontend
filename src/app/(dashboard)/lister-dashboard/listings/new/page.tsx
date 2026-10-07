@@ -1,4 +1,4 @@
-import NewListingPage from "@/src/components/listing/ui/NewListingPage";
+import NewListingPage from "@/src/features/listing/ui/NewListingPage";
 
 export default function NewListing() {
   return <NewListingPage />;

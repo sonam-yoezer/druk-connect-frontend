@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
-import type { Listing } from "@/src/components/listing/types/listing";
-import type { UpdateListingData } from "@/src/components/listing/api/updateListing";
+import type { Listing } from "@/src/features/listing/types/listing";
+import type { UpdateListingData } from "@/src/features/listing/api/updateListing";
 
 type Props = {
   listing: Listing;

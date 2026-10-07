@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
-import { ReputationCard } from "@/src/components/lister-dashboard/ui/ReputationCard";
-import { RequestCard } from "@/src/components/lister-dashboard/ui/RequestCard";
-import { StatCard } from "@/src/components/lister-dashboard/ui/StatCard";
-import { ListingCard } from "@/src/components/lister-dashboard/ui/ListingCard";
+import { ReputationCard } from "@/src/features/lister-dashboard/ui/ReputationCard";
+import { RequestCard } from "@/src/features/lister-dashboard/ui/RequestCard";
+import { StatCard } from "@/src/features/lister-dashboard/ui/StatCard";
+import { ListingCard } from "@/src/features/lister-dashboard/ui/ListingCard";
 
 const LISTINGS = [
   {

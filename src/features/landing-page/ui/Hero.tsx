@@ -150,7 +150,7 @@ export function Hero() {
             </Link>
 
             <Link
-              href="/auth/signup?role=lister"
+              href="/auth/signup?role=LISTER"
               className="group inline-flex h-12 items-center justify-center gap-2 rounded-md border border-line-strong bg-surface px-6 text-sm font-semibold text-ink transition-colors duration-200 hover:border-ink"
             >
               <Tag className="h-4 w-4 text-muted transition-colors duration-200 group-hover:text-brand" />

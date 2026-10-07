@@ -14,11 +14,11 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { useMyListings } from "@/src/components/listing/hooks/useMyListings";
-import type { Listing } from "@/src/components/listing/types/listing";
-import { useDeleteListing } from "@/src/components/listing/hooks/useDeleteListing";
-import { useUpdateListing } from "@/src/components/listing/hooks/useUpdateListing";
-import { EditListingModal } from "@/src/components/listing/ui/EditListingModal";
+import { useMyListings } from "@/src/features/listing/hooks/useMyListings";
+import type { Listing } from "@/src/features/listing/types/listing";
+import { useDeleteListing } from "@/src/features/listing/hooks/useDeleteListing";
+import { useUpdateListing } from "@/src/features/listing/hooks/useUpdateListing";
+import { EditListingModal } from "@/src/features/listing/ui/EditListingModal";
 
 const STATUS_OPTIONS = ["All", "Active", "Draft", "Paused"];
 

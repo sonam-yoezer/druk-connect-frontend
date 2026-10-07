@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
-import { getListingById } from "@/src/components/listing/api/getListingById";
-import { BuyerServiceDetail } from "@/src/components/services/ui/BuyerServiceDetail";
+import { getListingById } from "@/src/features/listing/api/getListingById";
+import { BuyerServiceDetail } from "@/src/features/services/ui/BuyerServiceDetail";
 
 type ServiceDetailPageProps = {
   params: Promise<{

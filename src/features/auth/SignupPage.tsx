@@ -13,6 +13,7 @@ import { ChooseRole } from "./ui/sign-up/ChooseRole";
 import { EmailVerification } from "./ui/sign-up/EmailVerification";
 import { MemberVouch } from "./ui/sign-up/MemberVouch";
 import { Header } from "../landing-page/ui/Header";
+import { useSearchParams } from "next/dist/client/components/navigation";
 
 type SignupRole = "LISTER" | "BUYER";
 
@@ -42,8 +43,14 @@ const INITIAL_SIGNUP_DATA: SignupData = {
 const INITIAL_STEP = 1;
 
 export default function SignupPage() {
-  const [role, setRole] = useState<SignupRole | null>(null);
+  const searchParams = useSearchParams();
 
+  const roleParam = searchParams.get("role");
+
+  const initialRole: SignupRole | null =
+    roleParam === "BUYER" || roleParam === "LISTER" ? roleParam : null;
+
+  const [role, setRole] = useState<SignupRole | null>(initialRole);
   const [step, setStep] = useState(INITIAL_STEP);
 
   const [userId, setUserId] = useState<string | null>(null);

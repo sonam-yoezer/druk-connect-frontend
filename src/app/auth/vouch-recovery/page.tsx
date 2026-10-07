@@ -1,6 +1,10 @@
-import VouchRecoveryPage from "@/src/components/auth/VouchRecoveryPage";
+import VouchRecoveryPage from "@/src/features/auth/VouchRecoveryPage";
 import { RedirectIfAuthenticatedRoute } from "@/src/shared/routes/RedirectIfAuthenticatedRoute";
 
 export default function Page() {
-  return <RedirectIfAuthenticatedRoute><VouchRecoveryPage /></RedirectIfAuthenticatedRoute>;
+  return (
+    <RedirectIfAuthenticatedRoute>
+      <VouchRecoveryPage />
+    </RedirectIfAuthenticatedRoute>
+  );
 }

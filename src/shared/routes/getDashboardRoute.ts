@@ -1,4 +1,4 @@
-import type { LoginUser } from "@/src/components/auth/types/login";
+import type { LoginUser } from "@/src/features/auth/types/login";
 
 export function getDashboardRoute(user: LoginUser): string {
   if (user.roles?.includes("ADMIN")) {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { BrandMark } from "../Primitives";
-import { SignupSteps } from "../sign-up/SignupSteps";
+import { SignupSteps } from "./SignupSteps";
 
 interface AuthHeaderProps {
   step: number;
@@ -28,11 +28,7 @@ export function AuthHeader({ step }: AuthHeaderProps) {
           Step {step} of 4
         </span>
       </div>
-
-<SignupSteps
-  currentStep={step}
-  totalSteps={4}
-  showLabel={false}
-/>    </header>
+      <SignupSteps currentStep={step} totalSteps={4} showLabel={false} />{" "}
+    </header>
   );
 }

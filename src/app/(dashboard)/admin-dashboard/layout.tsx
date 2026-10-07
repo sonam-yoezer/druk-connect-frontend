@@ -1,5 +1,5 @@
-import { DashboardSidebar } from "@/src/components/admin-dashboard/ui/DashboardSidebar";
-import { DashboardHeader } from "@/src/components/lister-dashboard/ui/DashboardHeader";
+import { DashboardSidebar } from "@/src/features/admin-dashboard/ui/DashboardSidebar";
+import { DashboardHeader } from "@/src/features/lister-dashboard/ui/DashboardHeader";
 import { ProtectedRoute } from "@/src/shared/routes/ProtectedRoute";
 
 export default function DashboardLayout({

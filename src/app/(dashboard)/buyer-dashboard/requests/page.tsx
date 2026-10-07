@@ -1,4 +1,4 @@
-import { IncomingVouchRequests } from "@/src/components/buyer-dashboard/ui/IncomingVouchRequests";
+import { IncomingVouchRequests } from "@/src/features/buyer-dashboard/ui/IncomingVouchRequests";
 
 export default function RequestsPage() {
   return (
