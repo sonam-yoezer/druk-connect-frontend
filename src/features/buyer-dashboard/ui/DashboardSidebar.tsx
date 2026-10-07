@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  Handshake,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -33,6 +34,11 @@ const NAVIGATION = [
     label: "My Requests",
     href: "/buyer-dashboard/requests",
     icon: Users,
+  },
+  {
+    label: "Manage Vouches",
+    href: "/buyer-dashboard/vouches",
+    icon: Handshake,
   },
 ];
 
