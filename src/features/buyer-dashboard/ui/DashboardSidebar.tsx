@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Handshake,
   LayoutDashboard,
+  History,
   LogOut,
   MessageCircle,
   Search,
@@ -15,6 +16,7 @@ import {
 import { useAuthStore } from "../../auth/store/authStore";
 
 const NAVIGATION = [
+  { label: "Service Availed History", href: "/buyer-dashboard/service-availed-history", icon: History },
   {
     label: "Dashboard",
     href: "/buyer-dashboard",

@@ -4,6 +4,7 @@ import { getListingById } from "@/src/features/listing/api/getListingById";
 import { BuyerServiceDetail } from "@/src/features/services/ui/BuyerServiceDetail";
 
 type ServiceDetailPageProps = {
+  searchParams: Promise<{ reviewRequest?: string; review?: string; contactReturn?: string }>;
   params: Promise<{
     listingId: string;
   }>;
@@ -11,8 +12,10 @@ type ServiceDetailPageProps = {
 
 export default async function ServiceDetailPage({
   params,
+  searchParams,
 }: ServiceDetailPageProps) {
   const { listingId } = await params;
+  const query = await searchParams;
 
   const listing = await getListingById(listingId);
 
@@ -20,5 +23,5 @@ export default async function ServiceDetailPage({
     notFound();
   }
 
-  return <BuyerServiceDetail listing={listing} />;
+  return <BuyerServiceDetail listing={listing} reviewRequestId={query.reviewRequest} autoReview={query.review === "true"} contactReturn={query.contactReturn === "true"} />;
 }

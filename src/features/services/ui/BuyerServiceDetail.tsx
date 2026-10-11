@@ -15,7 +15,11 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getReviewEligibility, getReviewInvitation, recordReviewContact } from "../../reviews/api/reviewRequests";
+import { useAuthStore } from "../../auth/store/authStore";
 
 import type {
   ListingDetails,
@@ -26,32 +30,72 @@ import { ReviewForm } from "../../reviews/ui/ReviewForm";
 
 type ServiceDetailProps = {
   listing: ListingDetails;
+  reviewRequestId?: string;
+  autoReview?: boolean;
+  contactReturn?: boolean;
 };
 
-export function BuyerServiceDetail({ listing }: ServiceDetailProps) {
+export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = false, contactReturn = false }: ServiceDetailProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const router = useRouter();
+  const client = useQueryClient();
+  const userId = useAuthStore(state => state.user?.id);
+  const [reviewError, setReviewError] = useState("");
+  const [reviewNotice, setReviewNotice] = useState("");
+  const [invitationDismissed, setInvitationDismissed] = useState(false);
+  const waitingForReturn = useRef(false);
+  const contactRecorded = useRef<ReturnType<typeof recordReviewContact> | null>(null);
+  const eligibility = useQuery({queryKey:["review-eligibility", listing.id, userId], queryFn:()=>getReviewEligibility(listing.id), enabled:Boolean(userId), retry:false});
+  const invitation = useQuery({queryKey:["review-invitation",reviewRequestId,userId],queryFn:()=>getReviewInvitation(reviewRequestId!),enabled:Boolean(reviewRequestId && userId),retry:false});
+  const validInvitation = invitation.data?.listingId === listing.id && invitation.data?.buyerUserId === userId;
+  const invitationReview = autoReview && (!reviewRequestId || validInvitation) && !invitationDismissed;
+  useEffect(() => {
+    const onReturn = () => {
+      if (document.visibilityState !== "visible" || !waitingForReturn.current) return;
+      waitingForReturn.current = false;
+      void (contactRecorded.current || Promise.resolve(null)).then(() => getReviewEligibility(listing.id)).then(result => {
+        void client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]});
+        if (result.canReview) setShowReviewPrompt(true);
+        else setReviewNotice(result.message);
+      }).catch(error => setReviewError(error.message));
+    };
+    window.addEventListener("focus", onReturn);
+    document.addEventListener("visibilitychange", onReturn);
+    return () => {window.removeEventListener("focus", onReturn);document.removeEventListener("visibilitychange", onReturn);};
+  }, [listing.id, userId, client]);
+
 
   const images = listing.images
     .slice()
     .sort((a, b) => a.sortOrder - b.sortOrder);
 
   const handleWhatsAppContacted = () => {
-    setShowReviewPrompt(true);
+    setReviewError("");
+    waitingForReturn.current = true;
+    contactRecorded.current = recordReviewContact(listing.id);
+    void contactRecorded.current.then(() => client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]})).catch(error => {
+      waitingForReturn.current = false;
+      setReviewError(error.message);
+    });
   };
 
   const handleReviewPromptYes = () => {
     setShowReviewPrompt(false);
     setShowReviewModal(true);
+    setInvitationDismissed(true);
   };
 
   const handleReviewPromptClose = () => {
     setShowReviewPrompt(false);
+    setInvitationDismissed(true);
   };
 
   const handleReviewModalClose = () => {
     setShowReviewModal(false);
+    setInvitationDismissed(true);
+    if (reviewRequestId || contactReturn) router.replace(`/buyer-dashboard/services/${listing.id}`, {scroll:false});
   };
 
   return (
@@ -59,6 +103,14 @@ export function BuyerServiceDetail({ listing }: ServiceDetailProps) {
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-5 pb-16 pt-8 sm:px-8 lg:px-10 lg:pb-24">
           <ServiceBreadcrumb listing={listing} />
+          {reviewError && <p role="alert" className="mt-4 rounded-md bg-danger-tint p-4 text-danger">{reviewError}</p>}
+          {reviewNotice && <p role="status" className="mt-4 rounded-md bg-brand-tint p-4">{reviewNotice}</p>}
+          {invitation.error && <p role="alert" className="mt-4 rounded-md bg-danger-tint p-4 text-danger">{invitation.error.message} Sign in with the invited Buyer account.</p>}
+          {reviewRequestId && invitation.isPending && <p role="status" className="mt-4">Checking your review invitation…</p>}
+          {invitation.data && !validInvitation && <p role="alert" className="mt-4 text-danger">This invitation is for a different service or account.</p>}
+          {eligibility.error && <p role="alert" className="mt-4 text-danger">{eligibility.error.message}</p>}
+          {eligibility.data?.canReview && <button className="mt-4 rounded-md bg-brand px-4 py-2 text-white" onClick={()=>setShowReviewModal(true)}>Leave a review</button>}
+          {reviewRequestId && validInvitation && eligibility.data && !eligibility.data.canReview && <p role="status" className="mt-4">{eligibility.data.message}</p>}
 
           <div className="mt-7 grid items-start gap-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.85fr)] lg:gap-12">
             <div className="min-w-0">
@@ -92,7 +144,7 @@ export function BuyerServiceDetail({ listing }: ServiceDetailProps) {
         </div>
       </main>
 
-      {showReviewPrompt && (
+      {(showReviewPrompt || (contactReturn && !invitationDismissed)) && eligibility.data?.canReview && !showReviewModal && (
         <ReviewPrompt
           listingTitle={listing.listingTitle}
           onYes={handleReviewPromptYes}
@@ -100,8 +152,13 @@ export function BuyerServiceDetail({ listing }: ServiceDetailProps) {
         />
       )}
 
-      {showReviewModal && (
-        <ReviewModal listing={listing} onClose={handleReviewModalClose} />
+      {(showReviewModal || invitationReview) && eligibility.data?.canReview && (
+        <ReviewModal listing={listing} onClose={handleReviewModalClose} onSubmitted={() => {
+          handleReviewModalClose();
+          setReviewNotice("Review submitted successfully and is awaiting admin approval.");
+          void client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]});
+          router.refresh();
+        }} />
       )}
     </>
   );
@@ -585,7 +642,7 @@ function ReviewPrompt({
         <p className="mt-2 text-sm leading-6 text-muted">
           You just contacted{" "}
           <span className="font-semibold text-ink">{listingTitle}</span>. If
-          you've already used the service, you can share your experience with
+          you&apos;ve already used the service, you can share your experience with
           the community.
         </p>
 
@@ -618,9 +675,11 @@ function ReviewPrompt({
 function ReviewModal({
   listing,
   onClose,
+  onSubmitted,
 }: {
   listing: ListingDetails;
   onClose: () => void;
+  onSubmitted: () => void;
 }) {
   return (
     <div
@@ -658,7 +717,7 @@ function ReviewModal({
         </div>
 
         <div className="mt-6">
-          <ReviewForm listingId={listing.id} onSuccess={onClose} />
+          <ReviewForm listingId={listing.id} onSuccess={onSubmitted} />
         </div>
       </div>
     </div>
