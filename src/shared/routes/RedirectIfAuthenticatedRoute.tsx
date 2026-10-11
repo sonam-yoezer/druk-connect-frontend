@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/src/features/auth/store/authStore";
 import { getDashboardRoute } from "./getDashboardRoute";
 
+import { reviewReturnPath } from "./reviewReturnPath";
+
 interface RedirectIfAuthenticatedRouteProps {
+  redirectTo?: string;
   children: React.ReactNode;
 }
 
 export function RedirectIfAuthenticatedRoute({
   children,
+  redirectTo,
 }: RedirectIfAuthenticatedRouteProps) {
   const router = useRouter();
 
@@ -23,8 +27,8 @@ export function RedirectIfAuthenticatedRoute({
       return;
     }
 
-    router.replace(getDashboardRoute(user));
-  }, [hydrated, isAuthenticated, user, router]);
+    router.replace(user.accessType === "BUYER" ? reviewReturnPath(redirectTo) || getDashboardRoute(user) : getDashboardRoute(user));
+  }, [hydrated, isAuthenticated, user, router, redirectTo]);
 
   if (!hydrated || isAuthenticated) {
     return null;

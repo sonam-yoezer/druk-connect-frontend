@@ -40,7 +40,7 @@ export function ProtectedRoute({
     if (!hydrated) return;
 
     if (!isAuthenticated || !user) {
-      router.replace("/auth/login");
+      router.replace(`/auth/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`);
       return;
     }
 

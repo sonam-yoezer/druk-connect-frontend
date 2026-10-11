@@ -8,9 +8,10 @@ import { SignInForm } from "./ui/sign-in/SignInForm";
 import { SignInBrandPanel } from "./ui/sign-in/SignInBrandPanel";
 import { useLogin } from "./hooks/useLogin";
 import { useAuthStore } from "./store/authStore";
+import { reviewReturnPath } from "@/src/shared/routes/reviewReturnPath";
 import { getDashboardRoute } from "@/src/shared/routes/getDashboardRoute";
 
-export default function SignInPage() {
+export default function SignInPage({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
 
   const completionNotice = useVouchRecoveryStore((state) => state.completionNotice);
@@ -46,7 +47,7 @@ export default function SignInPage() {
           useVouchRecoveryStore.getState().clear();
           setSession(response.tokens);
 
-          router.push(getDashboardRoute(response.tokens.user));
+          router.push(response.tokens.user.accessType === "BUYER" ? reviewReturnPath(redirectTo) || getDashboardRoute(response.tokens.user) : getDashboardRoute(response.tokens.user));
         },
 
         onError: (error) => {
@@ -66,6 +67,11 @@ export default function SignInPage() {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className="flex min-h-full justify-center px-6 pb-16 pt-8 sm:px-10 lg:px-12 lg:py-12">
             <div className="w-full max-w-110 lg:my-auto">
+              {reviewReturnPath(redirectTo)?.startsWith("/buyer-dashboard/services/") && (
+                <p className="mb-6 rounded-lg bg-brand-tint p-4 text-sm text-brand">
+                  Sign in with the invited Buyer account to review this service. We’ll return you to the review form after login.
+                </p>
+              )}
               {completionNotice && (
                 <p role="status" className="mb-6 rounded-lg bg-brand-tint p-4 text-brand">
                   You have now met the minimum required vouches. Please sign in to restore full access.

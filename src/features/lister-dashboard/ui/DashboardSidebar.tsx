@@ -6,6 +6,7 @@ import {
   BarChart3,
   Bell,
   LayoutDashboard,
+  History,
   LogOut,
   Settings,
   Store,
@@ -15,6 +16,7 @@ import {
 import { useAuthStore } from "../../auth/store/authStore";
 
 const NAVIGATION = [
+  { label: "Service Availed History", href: "/lister-dashboard/service-availed-history", icon: History },
   {
     label: "Dashboard",
     href: "/lister-dashboard",
