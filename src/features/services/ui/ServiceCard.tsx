@@ -8,7 +8,10 @@ type ServiceCardProps = {
   hrefBase?: string;
 };
 
-export function ServiceCard({ listing, hrefBase }: ServiceCardProps) {
+export function ServiceCard({
+  listing,
+  hrefBase = "/services",
+}: ServiceCardProps) {
   const image = [...(listing.images ?? [])].sort(
     (a, b) => a.sortOrder - b.sortOrder,
   )[0];

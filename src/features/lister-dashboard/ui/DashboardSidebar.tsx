@@ -16,7 +16,6 @@ import {
 import { useAuthStore } from "../../auth/store/authStore";
 
 const NAVIGATION = [
-  { label: "Service Availed History", href: "/lister-dashboard/service-availed-history", icon: History },
   {
     label: "Dashboard",
     href: "/lister-dashboard",
@@ -41,6 +40,11 @@ const NAVIGATION = [
     label: "Vouches",
     href: "/lister-dashboard/vouches",
     icon: Users,
+  },
+  {
+    label: "Service Availed History",
+    href: "/lister-dashboard/service-availed-history",
+    icon: History,
   },
 ];
 

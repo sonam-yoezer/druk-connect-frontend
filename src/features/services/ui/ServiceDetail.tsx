@@ -118,7 +118,7 @@ export function ServiceDetail({ listing }: ServiceDetailProps) {
             </section>
 
             {/* Details */}
-            <section className="border-t border-line py-7">
+            {/* <section className="border-t border-line py-7">
               <SectionHeading>Service details</SectionHeading>
 
               <div className="grid sm:grid-cols-2 sm:gap-x-10">
@@ -162,7 +162,7 @@ export function ServiceDetail({ listing }: ServiceDetailProps) {
                   </div>
                 </div>
               )}
-            </section>
+            </section> */}
 
             {/* Availability */}
             <section className="border-t border-line py-7">
@@ -379,7 +379,7 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
   const { lister } = listing;
 
   const router = useRouter();
-  const user = useAuthStore(state => state.user);
+  const user = useAuthStore((state) => state.user);
   const [contactError, setContactError] = useState("");
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -397,7 +397,13 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
       window.open(lister.whatsappLink, "_blank", "noopener,noreferrer");
       if (user?.accessType === "BUYER") {
         setContactError("");
-        void recordReviewContact(listing.id).then(() => router.push(`/buyer-dashboard/services/${listing.id}?contactReturn=true`)).catch(error => setContactError(error.message));
+        void recordReviewContact(listing.id)
+          .then(() =>
+            router.push(
+              `/buyer-dashboard/services/${listing.id}?contactReturn=true`,
+            ),
+          )
+          .catch((error) => setContactError(error.message));
       }
     }
   };
@@ -463,8 +469,14 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
         />
       </div>
 
-      {user?.id === lister.userId && user.accessType === "LISTER" && <RequestReviewPanel listingId={listing.id} />}
-      {contactError && <p role="alert" className="mt-3 text-sm text-danger">{contactError}</p>}
+      {user?.id === lister.userId && user.accessType === "LISTER" && (
+        <RequestReviewPanel listingId={listing.id} />
+      )}
+      {contactError && (
+        <p role="alert" className="mt-3 text-sm text-danger">
+          {contactError}
+        </p>
+      )}
       {/* WhatsApp */}
       {lister.whatsappLink && (
         <button
@@ -476,29 +488,6 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
           Message on WhatsApp
         </button>
       )}
-
-      {/* Secondary contact */}
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        {lister.phoneNumber && (
-          <a
-            href={`tel:${lister.phoneNumber}`}
-            className="flex h-11 items-center justify-center gap-2 rounded-md border border-line-strong text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
-          >
-            <Phone className="h-4 w-4" />
-            Call
-          </a>
-        )}
-
-        {lister.emailLink && (
-          <a
-            href={lister.emailLink}
-            className="flex h-11 items-center justify-center gap-2 rounded-md border border-line-strong text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
-          >
-            <Mail className="h-4 w-4" />
-            Email
-          </a>
-        )}
-      </div>
     </div>
   );
 }

@@ -18,7 +18,11 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getReviewEligibility, getReviewInvitation, recordReviewContact } from "../../reviews/api/reviewRequests";
+import {
+  getReviewEligibility,
+  getReviewInvitation,
+  recordReviewContact,
+} from "../../reviews/api/reviewRequests";
 import { useAuthStore } from "../../auth/store/authStore";
 
 import type {
@@ -35,37 +39,65 @@ type ServiceDetailProps = {
   contactReturn?: boolean;
 };
 
-export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = false, contactReturn = false }: ServiceDetailProps) {
+export function BuyerServiceDetail({
+  listing,
+  reviewRequestId,
+  autoReview = false,
+  contactReturn = false,
+}: ServiceDetailProps) {
   const [activeImage, setActiveImage] = useState(0);
   const [showReviewPrompt, setShowReviewPrompt] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const router = useRouter();
   const client = useQueryClient();
-  const userId = useAuthStore(state => state.user?.id);
+  const userId = useAuthStore((state) => state.user?.id);
   const [reviewError, setReviewError] = useState("");
   const [reviewNotice, setReviewNotice] = useState("");
   const [invitationDismissed, setInvitationDismissed] = useState(false);
   const waitingForReturn = useRef(false);
-  const contactRecorded = useRef<ReturnType<typeof recordReviewContact> | null>(null);
-  const eligibility = useQuery({queryKey:["review-eligibility", listing.id, userId], queryFn:()=>getReviewEligibility(listing.id), enabled:Boolean(userId), retry:false});
-  const invitation = useQuery({queryKey:["review-invitation",reviewRequestId,userId],queryFn:()=>getReviewInvitation(reviewRequestId!),enabled:Boolean(reviewRequestId && userId),retry:false});
-  const validInvitation = invitation.data?.listingId === listing.id && invitation.data?.buyerUserId === userId;
-  const invitationReview = autoReview && (!reviewRequestId || validInvitation) && !invitationDismissed;
+  const contactRecorded = useRef<ReturnType<typeof recordReviewContact> | null>(
+    null,
+  );
+  const eligibility = useQuery({
+    queryKey: ["review-eligibility", listing.id, userId],
+    queryFn: () => getReviewEligibility(listing.id),
+    enabled: Boolean(userId),
+    retry: false,
+  });
+  const invitation = useQuery({
+    queryKey: ["review-invitation", reviewRequestId, userId],
+    queryFn: () => getReviewInvitation(reviewRequestId!),
+    enabled: Boolean(reviewRequestId && userId),
+    retry: false,
+  });
+  const validInvitation =
+    invitation.data?.listingId === listing.id &&
+    invitation.data?.buyerUserId === userId;
+  const invitationReview =
+    autoReview && (!reviewRequestId || validInvitation) && !invitationDismissed;
   useEffect(() => {
     const onReturn = () => {
-      if (document.visibilityState !== "visible" || !waitingForReturn.current) return;
+      if (document.visibilityState !== "visible" || !waitingForReturn.current)
+        return;
       waitingForReturn.current = false;
-      void (contactRecorded.current || Promise.resolve(null)).then(() => getReviewEligibility(listing.id)).then(result => {
-        void client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]});
-        if (result.canReview) setShowReviewPrompt(true);
-        else setReviewNotice(result.message);
-      }).catch(error => setReviewError(error.message));
+      void (contactRecorded.current || Promise.resolve(null))
+        .then(() => getReviewEligibility(listing.id))
+        .then((result) => {
+          void client.invalidateQueries({
+            queryKey: ["review-eligibility", listing.id, userId],
+          });
+          if (result.canReview) setShowReviewPrompt(true);
+          else setReviewNotice(result.message);
+        })
+        .catch((error) => setReviewError(error.message));
     };
     window.addEventListener("focus", onReturn);
     document.addEventListener("visibilitychange", onReturn);
-    return () => {window.removeEventListener("focus", onReturn);document.removeEventListener("visibilitychange", onReturn);};
+    return () => {
+      window.removeEventListener("focus", onReturn);
+      document.removeEventListener("visibilitychange", onReturn);
+    };
   }, [listing.id, userId, client]);
-
 
   const images = listing.images
     .slice()
@@ -75,10 +107,16 @@ export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = fals
     setReviewError("");
     waitingForReturn.current = true;
     contactRecorded.current = recordReviewContact(listing.id);
-    void contactRecorded.current.then(() => client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]})).catch(error => {
-      waitingForReturn.current = false;
-      setReviewError(error.message);
-    });
+    void contactRecorded.current
+      .then(() =>
+        client.invalidateQueries({
+          queryKey: ["review-eligibility", listing.id, userId],
+        }),
+      )
+      .catch((error) => {
+        waitingForReturn.current = false;
+        setReviewError(error.message);
+      });
   };
 
   const handleReviewPromptYes = () => {
@@ -95,7 +133,10 @@ export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = fals
   const handleReviewModalClose = () => {
     setShowReviewModal(false);
     setInvitationDismissed(true);
-    if (reviewRequestId || contactReturn) router.replace(`/buyer-dashboard/services/${listing.id}`, {scroll:false});
+    if (reviewRequestId || contactReturn)
+      router.replace(`/buyer-dashboard/services/${listing.id}`, {
+        scroll: false,
+      });
   };
 
   return (
@@ -103,14 +144,58 @@ export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = fals
       <main className="min-h-screen bg-background">
         <div className="mx-auto max-w-7xl px-5 pb-16 pt-8 sm:px-8 lg:px-10 lg:pb-24">
           <ServiceBreadcrumb listing={listing} />
-          {reviewError && <p role="alert" className="mt-4 rounded-md bg-danger-tint p-4 text-danger">{reviewError}</p>}
-          {reviewNotice && <p role="status" className="mt-4 rounded-md bg-brand-tint p-4">{reviewNotice}</p>}
-          {invitation.error && <p role="alert" className="mt-4 rounded-md bg-danger-tint p-4 text-danger">{invitation.error.message} Sign in with the invited Buyer account.</p>}
-          {reviewRequestId && invitation.isPending && <p role="status" className="mt-4">Checking your review invitation…</p>}
-          {invitation.data && !validInvitation && <p role="alert" className="mt-4 text-danger">This invitation is for a different service or account.</p>}
-          {eligibility.error && <p role="alert" className="mt-4 text-danger">{eligibility.error.message}</p>}
-          {eligibility.data?.canReview && <button className="mt-4 rounded-md bg-brand px-4 py-2 text-white" onClick={()=>setShowReviewModal(true)}>Leave a review</button>}
-          {reviewRequestId && validInvitation && eligibility.data && !eligibility.data.canReview && <p role="status" className="mt-4">{eligibility.data.message}</p>}
+          {reviewError && (
+            <p
+              role="alert"
+              className="mt-4 rounded-md bg-danger-tint p-4 text-danger"
+            >
+              {reviewError}
+            </p>
+          )}
+          {reviewNotice && (
+            <p role="status" className="mt-4 rounded-md bg-brand-tint p-4">
+              {reviewNotice}
+            </p>
+          )}
+          {invitation.error && (
+            <p
+              role="alert"
+              className="mt-4 rounded-md bg-danger-tint p-4 text-danger"
+            >
+              {invitation.error.message} Sign in with the invited Buyer account.
+            </p>
+          )}
+          {reviewRequestId && invitation.isPending && (
+            <p role="status" className="mt-4">
+              Checking your review invitation…
+            </p>
+          )}
+          {invitation.data && !validInvitation && (
+            <p role="alert" className="mt-4 text-danger">
+              This invitation is for a different service or account.
+            </p>
+          )}
+          {eligibility.error && (
+            <p role="alert" className="mt-4 text-danger">
+              {eligibility.error.message}
+            </p>
+          )}
+          {eligibility.data?.canReview && (
+            <button
+              className="mt-4 rounded-md bg-brand px-4 py-2 text-white"
+              onClick={() => setShowReviewModal(true)}
+            >
+              Leave a review
+            </button>
+          )}
+          {reviewRequestId &&
+            validInvitation &&
+            eligibility.data &&
+            !eligibility.data.canReview && (
+              <p role="status" className="mt-4">
+                {eligibility.data.message}
+              </p>
+            )}
 
           <div className="mt-7 grid items-start gap-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.85fr)] lg:gap-12">
             <div className="min-w-0">
@@ -144,21 +229,31 @@ export function BuyerServiceDetail({ listing, reviewRequestId, autoReview = fals
         </div>
       </main>
 
-      {(showReviewPrompt || (contactReturn && !invitationDismissed)) && eligibility.data?.canReview && !showReviewModal && (
-        <ReviewPrompt
-          listingTitle={listing.listingTitle}
-          onYes={handleReviewPromptYes}
-          onClose={handleReviewPromptClose}
-        />
-      )}
+      {(showReviewPrompt || (contactReturn && !invitationDismissed)) &&
+        eligibility.data?.canReview &&
+        !showReviewModal && (
+          <ReviewPrompt
+            listingTitle={listing.listingTitle}
+            onYes={handleReviewPromptYes}
+            onClose={handleReviewPromptClose}
+          />
+        )}
 
       {(showReviewModal || invitationReview) && eligibility.data?.canReview && (
-        <ReviewModal listing={listing} onClose={handleReviewModalClose} onSubmitted={() => {
-          handleReviewModalClose();
-          setReviewNotice("Review submitted successfully and is awaiting admin approval.");
-          void client.invalidateQueries({queryKey:["review-eligibility",listing.id,userId]});
-          router.refresh();
-        }} />
+        <ReviewModal
+          listing={listing}
+          onClose={handleReviewModalClose}
+          onSubmitted={() => {
+            handleReviewModalClose();
+            setReviewNotice(
+              "Review submitted successfully and is awaiting admin approval.",
+            );
+            void client.invalidateQueries({
+              queryKey: ["review-eligibility", listing.id, userId],
+            });
+            router.refresh();
+          }}
+        />
       )}
     </>
   );
@@ -574,16 +669,6 @@ function ProviderCard({
       )}
 
       <div className="mt-2 grid grid-cols-2 gap-2">
-        {lister.phoneNumber && (
-          <a
-            href={`tel:${lister.phoneNumber}`}
-            className="flex h-11 items-center justify-center gap-2 rounded-md border border-line-strong text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
-          >
-            <Phone className="h-4 w-4" />
-            Call
-          </a>
-        )}
-
         {lister.emailLink && (
           <a
             href={lister.emailLink}
@@ -642,8 +727,8 @@ function ReviewPrompt({
         <p className="mt-2 text-sm leading-6 text-muted">
           You just contacted{" "}
           <span className="font-semibold text-ink">{listingTitle}</span>. If
-          you&apos;ve already used the service, you can share your experience with
-          the community.
+          you&apos;ve already used the service, you can share your experience
+          with the community.
         </p>
 
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
