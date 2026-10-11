@@ -28,18 +28,17 @@ export default function NewListingPage() {
     const data = {
       listingTitle: formData.get("listingTitle") as string,
       listingCategory: formData.get("listingCategory") as string,
-      city: formData.get("city") as string,
+      suburb: formData.get("suburb") as string,
+      state: formData.get("state") as string,
+      postcode: formData.get("postcode") as string,
       description: formData.get("description") as string,
-      cuisine: formData.get("cuisine") as string,
       serviceType: formData.get("serviceType") as string,
-      minimumOrder: Number(formData.get("minimumOrder")),
-      serves: Number(formData.get("serves")),
       dietaryOptions,
       availability: formData.get("availability") as
         | "BOTH"
         | "WEEKDAYS"
         | "WEEKENDS",
-      pricingType,
+      pricingType: formData.get("pricingType") as "PAID" | "FREE",
       rateAmount:
         pricingType === "PAID" ? Number(formData.get("rateAmount")) : null,
     };
@@ -126,49 +125,50 @@ export default function NewListingPage() {
                 required
               />
 
+              <SelectField
+                label="Service type"
+                name="serviceType"
+                options={[
+                  "Home Catering",
+                  "Community Meal",
+                  "Restaurant",
+                  "Meal Preparation",
+                  "Food Delivery",
+                  "Other",
+                ]}
+                required
+              />
+
               <div className="grid gap-5 sm:grid-cols-2">
-                <SelectField
-                  label="Cuisine"
-                  name="cuisine"
-                  options={[
-                    "Bhutanese",
-                    "Indian",
-                    "Nepali",
-                    "Tibetan",
-                    "Asian",
-                    "Other",
-                  ]}
+                <Field
+                  label="Suburb"
+                  name="suburb"
+                  placeholder="e.g. Parramatta"
                   required
                 />
 
                 <SelectField
-                  label="Service type"
-                  name="serviceType"
+                  label="State or territory"
+                  name="state"
                   options={[
-                    "Home Catering",
-                    "Community Meal",
-                    "Restaurant",
-                    "Meal Preparation",
-                    "Food Delivery",
-                    "Other",
+                    "NSW",
+                    "VIC",
+                    "QLD",
+                    "SA",
+                    "WA",
+                    "TAS",
+                    "ACT",
+                    "NT",
                   ]}
                   required
                 />
               </div>
 
-              <SelectField
-                label="City"
-                name="city"
-                options={[
-                  "Sydney",
-                  "Melbourne",
-                  "Brisbane",
-                  "Adelaide",
-                  "Perth",
-                  "Canberra",
-                  "Hobart",
-                  "Darwin",
-                ]}
+              <Field
+                label="Postcode"
+                name="postcode"
+                type="text"
+                placeholder="e.g. 2150"
                 required
               />
 
@@ -194,26 +194,6 @@ export default function NewListingPage() {
             </div>
 
             <div className="mt-6 space-y-6">
-              <div className="grid gap-5 sm:grid-cols-2">
-                <Field
-                  label="Minimum order"
-                  name="minimumOrder"
-                  type="number"
-                  min="1"
-                  placeholder="2"
-                  required
-                />
-
-                <Field
-                  label="Serves"
-                  name="serves"
-                  type="number"
-                  min="1"
-                  placeholder="4"
-                  required
-                />
-              </div>
-
               <div>
                 <label className="text-sm font-semibold text-ink">
                   Dietary options

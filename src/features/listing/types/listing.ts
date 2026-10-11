@@ -1,12 +1,11 @@
 export type CreateListingData = {
   listingTitle: string;
   listingCategory: string;
-  city: string;
+  suburb: string;
+  state: string;
+  postcode: string;
   description: string;
-  cuisine: string;
   serviceType: string;
-  minimumOrder: number;
-  serves: number;
   dietaryOptions: string[];
   availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
   pricingType: "PAID" | "FREE";
@@ -17,12 +16,11 @@ export type CreateListingResponse = {
   id: string;
   listingTitle: string;
   listingCategory: string;
-  city: string;
+  suburb: string;
+  state: string;
+  postcode: string;
   description: string;
-  cuisine: string;
   serviceType: string;
-  minimumOrder: number;
-  serves: number;
   dietaryOptions: string[];
   availability: string;
   pricingType: string;

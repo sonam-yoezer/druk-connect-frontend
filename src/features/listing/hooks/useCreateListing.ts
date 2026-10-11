@@ -19,7 +19,7 @@ export function useCreateListing() {
         throw new Error("You must be signed in to create a listing.");
       }
 
-      return createListing(data, images, accessToken);
+      return createListing(data, images);
     },
   });
 }
