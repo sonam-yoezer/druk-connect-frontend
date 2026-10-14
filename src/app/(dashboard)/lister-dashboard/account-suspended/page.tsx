@@ -1,80 +1,86 @@
 "use client";
 
-import Link from "next/link";
+import { useState, type FormEvent } from "react";
 import {
-  ArrowLeft,
+  AlertCircle,
   CheckCircle2,
-  CircleAlert,
-  Clock,
+  Clock3,
   FileText,
   ShieldAlert,
 } from "lucide-react";
 import { useMyRestrictions } from "@/src/features/lister-restrictions/hooks/useMyRestrictions";
+import { useSubmitAppeal } from "@/src/features/lister-restrictions/hooks/useSubmitAppeal";
 
 export default function AccountSuspendedPage() {
   const { data: restrictions, isPending, isError, error } = useMyRestrictions();
 
+  const [appealReason, setAppealReason] = useState("");
+  const appealMutation = useSubmitAppeal();
+
+  function handleAppealSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const reason = appealReason.trim();
+
+    if (!reason || appealMutation.isPending) {
+      return;
+    }
+
+    appealMutation.mutate({ reason });
+  }
+
   if (isPending) {
     return (
-      <div className="mx-auto max-w-4xl p-6 sm:p-8">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 w-64 rounded bg-background" />
-          <div className="h-40 rounded-xl bg-background" />
-          <div className="h-32 rounded-xl bg-background" />
-        </div>
-        <p className="mt-4 text-sm text-muted">
-          Checking your account status...
-        </p>
-      </div>
+      <main className="mx-auto w-full max-w-4xl space-y-5 p-4 sm:p-6 lg:p-8">
+        <div className="h-8 w-56 animate-pulse rounded-lg bg-background" />
+        <div className="h-44 animate-pulse rounded-xl bg-background" />
+        <div className="h-36 animate-pulse rounded-xl bg-background" />
+        <p className="text-sm text-muted">Loading restriction details...</p>
+      </main>
     );
   }
 
   if (isError || !restrictions) {
     return (
-      <div className="mx-auto max-w-3xl p-6 sm:p-8">
-        <Link
-          href="/lister-dashboard"
-          className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-muted hover:text-ink"
+      <main className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <section
+          role="alert"
+          className="rounded-xl border border-red-200 bg-surface p-6 sm:p-8"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to dashboard
-        </Link>
+          <AlertCircle className="h-10 w-10 text-red-600" />
 
-        <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
-          <CircleAlert className="h-10 w-10 text-red-600" />
           <h1 className="mt-4 text-xl font-semibold text-ink">
-            Unable to load account status
+            Unable to load restriction details
           </h1>
+
           <p className="mt-2 text-sm leading-6 text-muted">
             {error instanceof Error
               ? error.message
-              : "We couldn't retrieve your account restriction details. Please try again later."}
+              : "Something went wrong while retrieving your account status. Please try again later."}
           </p>
         </section>
-      </div>
+      </main>
     );
   }
 
   if (!restrictions.restricted) {
     return (
-      <div className="mx-auto max-w-3xl p-6 sm:p-8">
-        <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
-          <CheckCircle2 className="h-10 w-10 text-green-600" />
+      <main className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <section className="rounded-xl border border-green-200 bg-surface p-6 sm:p-8">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-50">
+            <CheckCircle2 className="h-6 w-6 text-green-700" />
+          </div>
+
           <h1 className="mt-4 text-xl font-semibold text-ink">
             No active restrictions
           </h1>
+
           <p className="mt-2 text-sm leading-6 text-muted">
-            Your account currently has no active restriction. You can continue
+            Your account currently has no active restrictions. You can continue
             using the features available to your account.
           </p>
-          <Link
-            href="/lister-dashboard"
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
-          >
-            Return to dashboard
-          </Link>
         </section>
-      </div>
+      </main>
     );
   }
 
@@ -91,26 +97,21 @@ export default function AccountSuspendedPage() {
       ? restrictions.latestAppealStatus.replaceAll("_", " ")
       : "Appeal unavailable";
 
-  return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
-      <Link
-        href="/lister-dashboard"
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-ink"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to dashboard
-      </Link>
+  const appealSubmitted = appealMutation.isSuccess;
+  const appealStatusAfterSubmit = appealMutation.data?.status;
 
-      {/* Restriction summary */}
+  return (
+    <main className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
+      {/* Restriction overview */}
       <section className="overflow-hidden rounded-xl border border-red-200 bg-surface">
-        <div className="border-b border-red-200 bg-red-50 p-5 sm:p-7">
+        <div className="bg-red-50 p-6 sm:p-8">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-red-100">
               <ShieldAlert className="h-6 w-6 text-red-700" />
             </div>
 
             <div className="min-w-0 flex-1">
-              <span className="inline-flex items-center rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
+              <span className="inline-flex rounded-full border border-red-200 bg-white px-3 py-1 text-xs font-semibold text-red-700">
                 Listing restriction active
               </span>
 
@@ -118,15 +119,15 @@ export default function AccountSuspendedPage() {
                 Your listing privileges are restricted
               </h1>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+              <p className="mt-2 text-sm leading-6 text-muted">
                 {restrictions.message ??
-                  "You are currently unable to create new listings. Review the details below to understand this restriction."}
+                  "Your ability to create new listings is currently restricted. Review the details below."}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-4 p-5 sm:grid-cols-2 sm:p-7">
+        <div className="grid gap-4 p-6 sm:grid-cols-2 sm:p-8">
           <div className="rounded-lg border border-line p-4">
             <p className="text-xs font-medium text-muted">
               Restriction reference
@@ -146,7 +147,7 @@ export default function AccountSuspendedPage() {
       </section>
 
       {/* Reason for restriction */}
-      <section className="rounded-xl border border-line bg-surface p-5 sm:p-7">
+      <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background">
             <FileText className="h-5 w-5 text-muted" />
@@ -156,14 +157,15 @@ export default function AccountSuspendedPage() {
             <h2 className="text-base font-semibold text-ink">
               Reason for restriction
             </h2>
+
             <p className="mt-1 text-sm leading-6 text-muted">
-              The reason recorded by the DrukConnect moderation team.
+              Explanation recorded by the DrukConnect moderation team.
             </p>
 
             <div className="mt-4 rounded-lg border border-red-100 bg-red-50/50 p-4">
               <p className="whitespace-pre-wrap text-sm leading-7 text-ink">
                 {restrictions.reason?.trim() ||
-                  "No additional explanation has been provided. Please contact DrukConnect support for clarification."}
+                  "No additional explanation has been provided. Contact DrukConnect support for clarification."}
               </p>
             </div>
 
@@ -181,13 +183,15 @@ export default function AccountSuspendedPage() {
         </div>
       </section>
 
-      {/* Permissions */}
-      <section className="rounded-xl border border-line bg-surface p-5 sm:p-7">
+      {/* Account permissions */}
+      <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
         <h2 className="text-base font-semibold text-ink">
-          What can you still do?
+          Account permissions
         </h2>
-        <p className="mt-1 text-sm text-muted">
-          Your current account permissions are listed below.
+
+        <p className="mt-1 text-sm leading-6 text-muted">
+          These permissions reflect the current restriction returned by the
+          server.
         </p>
 
         <div className="mt-5 divide-y divide-line">
@@ -204,73 +208,170 @@ export default function AccountSuspendedPage() {
               label: "Create new listings",
               allowed: restrictions.canCreateListings,
             },
-          ].map((permission) => (
+          ].map(({ label, allowed }) => (
             <div
-              key={permission.label}
+              key={label}
               className="flex items-center justify-between gap-4 py-4 first:pt-0 last:pb-0"
             >
-              <span className="text-sm font-medium text-ink">
-                {permission.label}
-              </span>
+              <span className="text-sm font-medium text-ink">{label}</span>
 
               <span
                 className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
-                  permission.allowed
+                  allowed
                     ? "bg-green-50 text-green-700"
                     : "bg-red-50 text-red-700"
                 }`}
               >
-                {permission.allowed ? "Allowed" : "Restricted"}
+                {allowed ? "Allowed" : "Restricted"}
               </span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Appeal status and support */}
-      <section className="rounded-xl border border-line bg-surface p-5 sm:p-7">
+      {/* Appeal */}
+      <section className="rounded-xl border border-line bg-surface p-6 sm:p-8">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background">
-            <Clock className="h-5 w-5 text-muted" />
+            <Clock3 className="h-5 w-5 text-muted" />
           </div>
 
           <div className="min-w-0 flex-1">
             <h2 className="text-base font-semibold text-ink">
-              Appeal and next steps
+              Appeal and review
             </h2>
+
             <p className="mt-2 text-sm leading-6 text-muted">
-              If you believe this restriction was applied incorrectly, review
-              your appeal status or contact DrukConnect support for assistance.
+              If you believe this restriction was applied incorrectly, explain
+              your situation below. Your appeal will be sent to the moderation
+              team for review.
             </p>
-
-            <div className="mt-4 rounded-lg border border-line bg-background p-4">
-              <p className="text-xs font-medium text-muted">
-                Current appeal status
-              </p>
-              <p className="mt-1 text-sm font-semibold capitalize text-ink">
-                {appealStatus}
-              </p>
-            </div>
-
-            {!restrictions.appealAllowed && (
-              <p className="mt-3 text-xs leading-5 text-muted">
-                An appeal cannot currently be started from this page. Contact
-                support if you need clarification about the restriction or
-                appeal eligibility.
-              </p>
-            )}
           </div>
         </div>
 
-        <div className="mt-6 border-t border-line pt-5">
-          <Link
-            href="/lister-dashboard"
-            className="inline-flex h-11 items-center justify-center rounded-lg bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
+        {/* Submission confirmation */}
+        {appealSubmitted && (
+          <div
+            role="status"
+            className="mt-6 rounded-lg border border-green-200 bg-green-50 p-5"
           >
-            Return to dashboard
-          </Link>
-        </div>
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-green-700" />
+
+              <div className="min-w-0 flex-1">
+                <h3 className="text-sm font-semibold text-green-800">
+                  Appeal submitted successfully
+                </h3>
+
+                <p className="mt-1 text-sm leading-6 text-green-800">
+                  {appealMutation.data.message}
+                </p>
+
+                <p className="mt-3 text-sm font-semibold text-green-800">
+                  Status:{" "}
+                  {(appealStatusAfterSubmit ?? "PENDING").replaceAll("_", " ")}
+                </p>
+
+                <p className="mt-1 break-all text-xs text-green-800">
+                  Appeal ID: {appealMutation.data.appealId}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Submission error */}
+        {appealMutation.isError && (
+          <div
+            role="alert"
+            className="mt-6 rounded-lg border border-red-200 bg-red-50 p-4"
+          >
+            <p className="text-sm font-semibold text-red-800">
+              Appeal submission failed
+            </p>
+
+            <p className="mt-1 text-sm leading-6 text-red-700">
+              {appealMutation.error instanceof Error
+                ? appealMutation.error.message
+                : "We couldn't submit your appeal. Please try again."}
+            </p>
+          </div>
+        )}
+
+        {/* Form available when permitted */}
+        {!appealSubmitted && restrictions.appealAllowed && (
+          <form
+            onSubmit={handleAppealSubmit}
+            className="mt-6 space-y-4 border-t border-line pt-6"
+          >
+            <div>
+              <label
+                htmlFor="appeal-reason"
+                className="block text-sm font-semibold text-ink"
+              >
+                Explain why you are appealing
+              </label>
+
+              <p className="mt-1 text-sm leading-6 text-muted">
+                Include relevant details and explain why you believe the
+                restriction should be reconsidered.
+              </p>
+
+              <textarea
+                id="appeal-reason"
+                name="reason"
+                value={appealReason}
+                onChange={(event) => setAppealReason(event.target.value)}
+                placeholder="Write your appeal explanation..."
+                rows={5}
+                maxLength={3000}
+                required
+                disabled={appealMutation.isPending}
+                className="mt-3 w-full resize-y rounded-lg border border-line bg-background px-4 py-3 text-sm leading-6 text-ink outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+
+              <div className="mt-2 flex justify-end">
+                <span className="text-xs text-muted">
+                  {appealReason.length}/3000
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={
+                !appealReason.trim() ||
+                appealMutation.isPending ||
+                appealReason.trim().length > 3000
+              }
+              className="inline-flex h-11 items-center justify-center rounded-lg bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {appealMutation.isPending
+                ? "Submitting appeal..."
+                : "Submit appeal"}
+            </button>
+          </form>
+        )}
+
+        {/* Existing appeal status */}
+        {!appealSubmitted && !restrictions.appealAllowed && (
+          <div className="mt-6 rounded-lg border border-line bg-background p-5">
+            <p className="text-xs font-medium text-muted">
+              Current appeal status
+            </p>
+
+            <p className="mt-2 text-sm font-semibold capitalize text-ink">
+              {appealStatus}
+            </p>
+
+            <p className="mt-2 text-sm leading-6 text-muted">
+              {restrictions.latestAppealStatus?.toUpperCase() === "PENDING"
+                ? "Your appeal is awaiting moderation review. You do not need to submit another appeal while it is pending."
+                : "An appeal cannot currently be submitted. Contact DrukConnect support for clarification about your appeal eligibility."}
+            </p>
+          </div>
+        )}
       </section>
-    </div>
+    </main>
   );
 }
