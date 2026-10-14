@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  FileText,
   Handshake,
   LayoutDashboard,
   LogOut,
@@ -47,6 +48,11 @@ const NAVIGATION = [
     label: "Scam Reports",
     href: "/admin-dashboard/scam-reports",
     icon: ShieldAlert,
+  },
+  {
+    label: "Appeals",
+    href: "/admin-dashboard/appeals",
+    icon: FileText,
   },
   //   {
   //     label: "Vouches",
