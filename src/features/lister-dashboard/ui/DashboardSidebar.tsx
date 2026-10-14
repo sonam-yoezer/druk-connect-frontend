@@ -12,8 +12,10 @@ import {
   Store,
   UserRound,
   Users,
+  ShieldAlert,
 } from "lucide-react";
 import { useAuthStore } from "../../auth/store/authStore";
+import { useMyRestrictions } from "../../lister-restrictions/hooks/useMyRestrictions";
 
 const NAVIGATION = [
   {
@@ -72,6 +74,10 @@ export function DashboardSidebar() {
     router.replace("/");
   };
 
+  const { data: restrictions } = useMyRestrictions();
+
+  const isRestricted = restrictions?.restricted === true;
+
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-line bg-surface lg:flex lg:flex-col">
       <div className="flex h-16 items-center border-b border-line px-6">
@@ -98,6 +104,26 @@ export function DashboardSidebar() {
             />
           ))}
         </nav>
+
+        {isRestricted && (
+          <Link
+            href="/lister-dashboard/account-suspended"
+            className={`mt-3 flex items-center gap-3 rounded-md border px-3 py-2.5 text-sm font-semibold transition-colors ${
+              isActivePath(pathname, "/lister-dashboard/account-suspended")
+                ? "border-red-200 bg-red-100 text-red-800"
+                : "border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+            }`}
+          >
+            <ShieldAlert className="h-4 w-4 shrink-0" />
+
+            <span className="flex-1">Account Suspended</span>
+
+            <span
+              className="h-2 w-2 shrink-0 rounded-full bg-red-600"
+              aria-label="Restriction active"
+            />
+          </Link>
+        )}
 
         <div className="my-6 border-t border-line" />
 

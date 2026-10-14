@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ImagePlus } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ImagePlus } from "lucide-react";
 
 import { useCreateListing } from "../hooks/useCreateListing";
+import { useMyRestrictions } from "../../lister-restrictions/hooks/useMyRestrictions";
 
 export default function NewListingPage() {
   const router = useRouter();
@@ -14,6 +15,15 @@ export default function NewListingPage() {
   const [serverError, setServerError] = useState("");
 
   const { mutate: createListing, isPending } = useCreateListing();
+
+  const {
+    data: restrictions,
+    isPending: isRestrictionLoading,
+    isError: isRestrictionError,
+    error: restrictionError,
+  } = useMyRestrictions();
+
+  const canCreateListing = restrictions?.canCreateListings === true;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -88,311 +98,376 @@ export default function NewListingPage() {
         </div>
       </header>
 
-      <form onSubmit={handleSubmit} className="border border-line bg-surface">
-        <div className="divide-y divide-line">
-          {/* Basic information */}
-          <section className="p-6 sm:p-8">
+      {isRestrictionLoading ? (
+        <div className="border border-line bg-surface p-6">
+          <p className="text-sm text-muted">
+            Checking your account permissions...
+          </p>
+        </div>
+      ) : isRestrictionError ? (
+        <div role="alert" className="border border-red-200 bg-red-50 p-5">
+          <h2 className="font-semibold text-red-900">
+            Unable to verify your account status
+          </h2>
+
+          <p className="mt-2 text-sm text-red-800">
+            {restrictionError.message ||
+              "Please try again before creating a listing."}
+          </p>
+        </div>
+      ) : !canCreateListing ? (
+        <div role="alert" className="border border-amber-300 bg-amber-50 p-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+
             <div>
-              <h2 className="text-sm font-semibold text-ink">
-                Basic information
+              <h2 className="font-semibold text-amber-900">
+                Listing creation restricted
               </h2>
 
-              <p className="mt-1 text-sm text-muted">
-                Tell people what service you provide.
+              <p className="mt-2 text-sm leading-6 text-amber-800">
+                {restrictions?.message ??
+                  "Your account is currently not allowed to create new listings."}
               </p>
+
+              {restrictions?.reference && (
+                <p className="mt-3 text-sm text-amber-800">
+                  Reference: {restrictions.reference}
+                </p>
+              )}
+
+              {restrictions?.sourceListingTitle && (
+                <p className="mt-1 text-sm text-amber-800">
+                  Reported listing: {restrictions.sourceListingTitle}
+                </p>
+              )}
+
+              {restrictions?.appealAllowed && (
+                <p className="mt-3 text-sm font-medium text-amber-900">
+                  You may appeal this restriction.
+                </p>
+              )}
+
+              <Link
+                href="/lister-dashboard/listings"
+                className="mt-5 inline-flex h-10 items-center rounded-md border border-amber-400 px-4 text-sm font-semibold text-amber-900 hover:bg-amber-100"
+              >
+                Back to my listings
+              </Link>
             </div>
+          </div>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="border border-line bg-surface">
+          <div className="divide-y divide-line">
+            {/* Basic information */}
+            <section className="p-6 sm:p-8">
+              <div>
+                <h2 className="text-sm font-semibold text-ink">
+                  Basic information
+                </h2>
 
-            <div className="mt-6 space-y-5">
-              <Field
-                label="Service title"
-                name="listingTitle"
-                placeholder="e.g. Authentic Bhutanese Home Cooking"
-                required
-              />
+                <p className="mt-1 text-sm text-muted">
+                  Tell people what service you provide.
+                </p>
+              </div>
 
-              <SelectField
-                label="Listing category"
-                name="listingCategory"
-                options={[
-                  "Food & Catering",
-                  "Education",
-                  "Transport",
-                  "Home Services",
-                  "Beauty & Wellness",
-                  "Professional Services",
-                  "Other",
-                ]}
-                required
-              />
-
-              <SelectField
-                label="Service type"
-                name="serviceType"
-                options={[
-                  "Home Catering",
-                  "Community Meal",
-                  "Restaurant",
-                  "Meal Preparation",
-                  "Food Delivery",
-                  "Other",
-                ]}
-                required
-              />
-
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="mt-6 space-y-5">
                 <Field
-                  label="Suburb"
-                  name="suburb"
-                  placeholder="e.g. Parramatta"
+                  label="Service title"
+                  name="listingTitle"
+                  placeholder="e.g. Authentic Bhutanese Home Cooking"
                   required
                 />
 
                 <SelectField
-                  label="State or territory"
-                  name="state"
+                  label="Listing category"
+                  name="listingCategory"
                   options={[
-                    "NSW",
-                    "VIC",
-                    "QLD",
-                    "SA",
-                    "WA",
-                    "TAS",
-                    "ACT",
-                    "NT",
+                    "Food & Catering",
+                    "Education",
+                    "Transport",
+                    "Home Services",
+                    "Beauty & Wellness",
+                    "Professional Services",
+                    "Other",
                   ]}
                   required
                 />
-              </div>
 
-              <Field
-                label="Postcode"
-                name="postcode"
-                type="text"
-                placeholder="e.g. 2150"
-                required
-              />
+                <SelectField
+                  label="Service type"
+                  name="serviceType"
+                  options={[
+                    "Home Catering",
+                    "Community Meal",
+                    "Restaurant",
+                    "Meal Preparation",
+                    "Food Delivery",
+                    "Other",
+                  ]}
+                  required
+                />
 
-              <TextAreaField
-                label="Description"
-                name="description"
-                placeholder="Describe your service, what you offer, and anything customers should know."
-                required
-              />
-            </div>
-          </section>
-
-          {/* Service details */}
-          <section className="p-6 sm:p-8">
-            <div>
-              <h2 className="text-sm font-semibold text-ink">
-                Service details
-              </h2>
-
-              <p className="mt-1 text-sm text-muted">
-                Help customers understand how your service works.
-              </p>
-            </div>
-
-            <div className="mt-6 space-y-6">
-              <div>
-                <label className="text-sm font-semibold text-ink">
-                  Dietary options
-                </label>
-
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <CheckboxField
-                    name="dietaryOptions"
-                    value="Vegetarian"
-                    label="Vegetarian"
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <Field
+                    label="Suburb"
+                    name="suburb"
+                    placeholder="e.g. Parramatta"
+                    required
                   />
 
-                  <CheckboxField
-                    name="dietaryOptions"
-                    value="Halal"
-                    label="Halal"
-                  />
-
-                  <CheckboxField
-                    name="dietaryOptions"
-                    value="Vegan"
-                    label="Vegan"
-                  />
-
-                  <CheckboxField
-                    name="dietaryOptions"
-                    value="Gluten Free"
-                    label="Gluten Free"
+                  <SelectField
+                    label="State or territory"
+                    name="state"
+                    options={[
+                      "NSW",
+                      "VIC",
+                      "QLD",
+                      "SA",
+                      "WA",
+                      "TAS",
+                      "ACT",
+                      "NT",
+                    ]}
+                    required
                   />
                 </div>
+
+                <Field
+                  label="Postcode"
+                  name="postcode"
+                  type="text"
+                  placeholder="e.g. 2150"
+                  required
+                />
+
+                <TextAreaField
+                  label="Description"
+                  name="description"
+                  placeholder="Describe your service, what you offer, and anything customers should know."
+                  required
+                />
               </div>
+            </section>
 
-              <SelectField
-                label="Availability"
-                name="availability"
-                options={["BOTH", "WEEKDAYS", "WEEKENDS"]}
-                optionLabels={{
-                  BOTH: "Weekdays & weekends",
-                  WEEKDAYS: "Weekdays",
-                  WEEKENDS: "Weekends",
-                }}
-                required
-              />
-            </div>
-          </section>
-
-          {/* Pricing */}
-          <section className="p-6 sm:p-8">
-            <div>
-              <h2 className="text-sm font-semibold text-ink">Pricing</h2>
-
-              <p className="mt-1 text-sm text-muted">
-                Tell customers whether your service is paid or free.
-              </p>
-            </div>
-
-            <div className="mt-6 space-y-5">
+            {/* Service details */}
+            <section className="p-6 sm:p-8">
               <div>
-                <label className="text-sm font-semibold text-ink">
-                  Pricing type
-                </label>
+                <h2 className="text-sm font-semibold text-ink">
+                  Service details
+                </h2>
 
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                  <label className="flex cursor-pointer items-start gap-3 rounded-md border border-line bg-background p-4 transition-colors hover:border-brand has-[:checked]:border-brand has-[:checked]:bg-brand-tint">
-                    <input
-                      type="radio"
-                      name="pricingType"
-                      value="PAID"
-                      defaultChecked
-                      className="mt-0.5 h-4 w-4 accent-brand"
-                    />
-
-                    <div>
-                      <p className="text-sm font-semibold text-ink">
-                        Paid service
-                      </p>
-
-                      <p className="mt-1 text-xs leading-5 text-muted">
-                        Customers pay for this service.
-                      </p>
-                    </div>
-                  </label>
-
-                  <label className="flex cursor-pointer items-start gap-3 rounded-md border border-line bg-background p-4 transition-colors hover:border-brand has-[:checked]:border-brand has-[:checked]:bg-brand-tint">
-                    <input
-                      type="radio"
-                      name="pricingType"
-                      value="FREE"
-                      className="mt-0.5 h-4 w-4 accent-brand"
-                    />
-
-                    <div>
-                      <p className="text-sm font-semibold text-ink">
-                        Free service
-                      </p>
-
-                      <p className="mt-1 text-xs leading-5 text-muted">
-                        This service is provided for free.
-                      </p>
-                    </div>
-                  </label>
-                </div>
+                <p className="mt-1 text-sm text-muted">
+                  Help customers understand how your service works.
+                </p>
               </div>
 
-              <Field
-                label="Rate amount"
-                name="rateAmount"
-                type="number"
-                min="0"
-                step="0.01"
-                placeholder="35.00"
-              />
+              <div className="mt-6 space-y-6">
+                <div>
+                  <label className="text-sm font-semibold text-ink">
+                    Dietary options
+                  </label>
 
-              <p className="text-xs leading-5 text-muted">
-                Leave this empty for free services. The amount is sent as the
-                service rate.
-              </p>
-            </div>
-          </section>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <CheckboxField
+                      name="dietaryOptions"
+                      value="Vegetarian"
+                      label="Vegetarian"
+                    />
 
-          {/* Images */}
-          <section className="p-6 sm:p-8">
-            <div>
-              <h2 className="text-sm font-semibold text-ink">Listing images</h2>
+                    <CheckboxField
+                      name="dietaryOptions"
+                      value="Halal"
+                      label="Halal"
+                    />
 
-              <p className="mt-1 text-sm text-muted">
-                Add clear photos that represent your service.
-              </p>
-            </div>
+                    <CheckboxField
+                      name="dietaryOptions"
+                      value="Vegan"
+                      label="Vegan"
+                    />
 
-            <label className="mt-6 flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-line-strong bg-background px-6 text-center transition-colors hover:border-brand hover:bg-brand-tint">
-              <ImagePlus className="h-7 w-7 text-muted" />
-
-              <span className="mt-3 text-sm font-semibold text-ink">
-                {images.length > 0
-                  ? `${images.length} image${images.length > 1 ? "s" : ""} selected`
-                  : "Upload images"}
-              </span>
-
-              <span className="mt-1 text-xs text-muted">
-                PNG or JPG up to 5MB each
-              </span>
-
-              <input
-                type="file"
-                name="images"
-                accept="image/png,image/jpeg"
-                multiple
-                className="sr-only"
-                onChange={(event) => {
-                  setImages(Array.from(event.target.files ?? []));
-                }}
-              />
-            </label>
-
-            {images.length > 0 && (
-              <div className="mt-4 space-y-2">
-                {images.map((image) => (
-                  <div
-                    key={`${image.name}-${image.lastModified}`}
-                    className="flex items-center justify-between rounded-md border border-line bg-background px-3 py-2"
-                  >
-                    <p className="truncate text-sm text-ink">{image.name}</p>
-
-                    <p className="ml-4 shrink-0 text-xs text-muted">
-                      {(image.size / 1024 / 1024).toFixed(1)} MB
-                    </p>
+                    <CheckboxField
+                      name="dietaryOptions"
+                      value="Gluten Free"
+                      label="Gluten Free"
+                    />
                   </div>
-                ))}
+                </div>
+
+                <SelectField
+                  label="Availability"
+                  name="availability"
+                  options={["BOTH", "WEEKDAYS", "WEEKENDS"]}
+                  optionLabels={{
+                    BOTH: "Weekdays & weekends",
+                    WEEKDAYS: "Weekdays",
+                    WEEKENDS: "Weekends",
+                  }}
+                  required
+                />
+              </div>
+            </section>
+
+            {/* Pricing */}
+            <section className="p-6 sm:p-8">
+              <div>
+                <h2 className="text-sm font-semibold text-ink">Pricing</h2>
+
+                <p className="mt-1 text-sm text-muted">
+                  Tell customers whether your service is paid or free.
+                </p>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <label className="text-sm font-semibold text-ink">
+                    Pricing type
+                  </label>
+
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-md border border-line bg-background p-4 transition-colors hover:border-brand has-[:checked]:border-brand has-[:checked]:bg-brand-tint">
+                      <input
+                        type="radio"
+                        name="pricingType"
+                        value="PAID"
+                        defaultChecked
+                        className="mt-0.5 h-4 w-4 accent-brand"
+                      />
+
+                      <div>
+                        <p className="text-sm font-semibold text-ink">
+                          Paid service
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-muted">
+                          Customers pay for this service.
+                        </p>
+                      </div>
+                    </label>
+
+                    <label className="flex cursor-pointer items-start gap-3 rounded-md border border-line bg-background p-4 transition-colors hover:border-brand has-[:checked]:border-brand has-[:checked]:bg-brand-tint">
+                      <input
+                        type="radio"
+                        name="pricingType"
+                        value="FREE"
+                        className="mt-0.5 h-4 w-4 accent-brand"
+                      />
+
+                      <div>
+                        <p className="text-sm font-semibold text-ink">
+                          Free service
+                        </p>
+
+                        <p className="mt-1 text-xs leading-5 text-muted">
+                          This service is provided for free.
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <Field
+                  label="Rate amount"
+                  name="rateAmount"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="35.00"
+                />
+
+                <p className="text-xs leading-5 text-muted">
+                  Leave this empty for free services. The amount is sent as the
+                  service rate.
+                </p>
+              </div>
+            </section>
+
+            {/* Images */}
+            <section className="p-6 sm:p-8">
+              <div>
+                <h2 className="text-sm font-semibold text-ink">
+                  Listing images
+                </h2>
+
+                <p className="mt-1 text-sm text-muted">
+                  Add clear photos that represent your service.
+                </p>
+              </div>
+
+              <label className="mt-6 flex min-h-44 cursor-pointer flex-col items-center justify-center rounded-md border border-dashed border-line-strong bg-background px-6 text-center transition-colors hover:border-brand hover:bg-brand-tint">
+                <ImagePlus className="h-7 w-7 text-muted" />
+
+                <span className="mt-3 text-sm font-semibold text-ink">
+                  {images.length > 0
+                    ? `${images.length} image${images.length > 1 ? "s" : ""} selected`
+                    : "Upload images"}
+                </span>
+
+                <span className="mt-1 text-xs text-muted">
+                  PNG or JPG up to 5MB each
+                </span>
+
+                <input
+                  type="file"
+                  name="images"
+                  accept="image/png,image/jpeg"
+                  multiple
+                  className="sr-only"
+                  onChange={(event) => {
+                    setImages(Array.from(event.target.files ?? []));
+                  }}
+                />
+              </label>
+
+              {images.length > 0 && (
+                <div className="mt-4 space-y-2">
+                  {images.map((image) => (
+                    <div
+                      key={`${image.name}-${image.lastModified}`}
+                      className="flex items-center justify-between rounded-md border border-line bg-background px-3 py-2"
+                    >
+                      <p className="truncate text-sm text-ink">{image.name}</p>
+
+                      <p className="ml-4 shrink-0 text-xs text-muted">
+                        {(image.size / 1024 / 1024).toFixed(1)} MB
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            {/* Error */}
+            {serverError && (
+              <div className="bg-red-50 px-6 py-4 sm:px-8">
+                <p className="text-sm text-red-700">{serverError}</p>
               </div>
             )}
-          </section>
 
-          {/* Error */}
-          {serverError && (
-            <div className="bg-red-50 px-6 py-4 sm:px-8">
-              <p className="text-sm text-red-700">{serverError}</p>
+            {/* Actions */}
+            <div className="flex flex-col-reverse gap-3 bg-background p-6 sm:flex-row sm:items-center sm:justify-end sm:p-8">
+              <Link
+                href="/lister-dashboard/listings"
+                className="inline-flex h-11 items-center justify-center rounded-md border border-line-strong px-5 text-sm font-semibold text-muted transition-colors hover:bg-surface hover:text-ink"
+              >
+                Cancel
+              </Link>
+
+              <button
+                type="submit"
+                disabled={
+                  isPending || isRestrictionLoading || !canCreateListing
+                }
+                className="inline-flex h-11 items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isPending ? "Creating..." : "Create listing"}
+              </button>
             </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex flex-col-reverse gap-3 bg-background p-6 sm:flex-row sm:items-center sm:justify-end sm:p-8">
-            <Link
-              href="/lister-dashboard/listings"
-              className="inline-flex h-11 items-center justify-center rounded-md border border-line-strong px-5 text-sm font-semibold text-muted transition-colors hover:bg-surface hover:text-ink"
-            >
-              Cancel
-            </Link>
-
-            <button
-              type="submit"
-              disabled={isPending}
-              className="inline-flex h-11 items-center justify-center rounded-md bg-brand px-5 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isPending ? "Creating..." : "Create listing"}
-            </button>
           </div>
-        </div>
-      </form>
+        </form>
+      )}
     </div>
   );
 }
