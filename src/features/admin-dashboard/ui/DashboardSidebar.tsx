@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Search,
   Settings,
+  ShieldAlert,
   ShieldCheck,
   Star,
   UserRound,
@@ -41,6 +42,11 @@ const NAVIGATION = [
     label: "Vouch Withdrawals",
     href: "/admin-dashboard/vouch-withdrawals",
     icon: Handshake,
+  },
+  {
+    label: "Scam Reports",
+    href: "/admin-dashboard/scam-reports",
+    icon: ShieldAlert,
   },
   //   {
   //     label: "Vouches",

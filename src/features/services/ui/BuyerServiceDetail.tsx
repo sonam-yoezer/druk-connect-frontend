@@ -6,10 +6,9 @@ import {
   Check,
   Clock3,
   Eye,
-  Mail,
+  Flag,
   MapPin,
   MessageCircle,
-  Phone,
   ShieldCheck,
   Star,
   X,
@@ -31,6 +30,8 @@ import type {
   ListingReview,
 } from "../../listing/types/listing";
 import { ReviewForm } from "../../reviews/ui/ReviewForm";
+import { useReportScam } from "../../listing/hooks/useReportScam";
+import ReportScamModal from "./ReportScamModal";
 
 type ServiceDetailProps = {
   listing: ListingDetails;
@@ -58,6 +59,13 @@ export function BuyerServiceDetail({
   const contactRecorded = useRef<ReturnType<typeof recordReviewContact> | null>(
     null,
   );
+  const reportScamMutation = useReportScam();
+
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDetails, setReportDetails] = useState("");
+  const [reportError, setReportError] = useState("");
+  const [reportNotice, setReportNotice] = useState("");
   const eligibility = useQuery({
     queryKey: ["review-eligibility", listing.id, userId],
     queryFn: () => getReviewEligibility(listing.id),
@@ -139,6 +147,42 @@ export function BuyerServiceDetail({
       });
   };
 
+  const handleReportClick = () => {
+    setReportError("");
+    setReportNotice("");
+    setReportReason("");
+    setReportDetails("");
+    setShowReportModal(true);
+  };
+
+  const handleReportSubmit = async (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
+    event.preventDefault();
+
+    setReportError("");
+    setReportNotice("");
+
+    try {
+      await reportScamMutation.mutateAsync({
+        listingId: listing.id,
+        reason: reportReason,
+        details: reportDetails.trim(),
+      });
+
+      setShowReportModal(false);
+      setReportNotice(
+        "Your report has been submitted successfully. Thank you for helping keep the community safe.",
+      );
+    } catch (error) {
+      setReportError(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit your report. Please try again.",
+      );
+    }
+  };
+
   return (
     <>
       <main className="min-h-screen bg-background">
@@ -197,6 +241,21 @@ export function BuyerServiceDetail({
               </p>
             )}
 
+          {reportError && (
+            <p
+              role="alert"
+              className="mt-4 rounded-md bg-danger-tint p-4 text-danger"
+            >
+              {reportError}
+            </p>
+          )}
+
+          {reportNotice && (
+            <p role="status" className="mt-4 rounded-md bg-brand-tint p-4">
+              {reportNotice}
+            </p>
+          )}
+
           <div className="mt-7 grid items-start gap-10 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,0.85fr)] lg:gap-12">
             <div className="min-w-0">
               <ServiceGallery
@@ -221,6 +280,7 @@ export function BuyerServiceDetail({
               <ProviderCard
                 listing={listing}
                 onContact={handleWhatsAppContacted}
+                onReport={handleReportClick}
               />
 
               <BookingNotice />
@@ -252,6 +312,24 @@ export function BuyerServiceDetail({
               queryKey: ["review-eligibility", listing.id, userId],
             });
             router.refresh();
+          }}
+        />
+      )}
+
+      {showReportModal && (
+        <ReportScamModal
+          reason={reportReason}
+          details={reportDetails}
+          error={reportError}
+          isSubmitting={reportScamMutation.isPending}
+          onReasonChange={setReportReason}
+          onDetailsChange={setReportDetails}
+          onSubmit={handleReportSubmit}
+          onClose={() => {
+            if (reportScamMutation.isPending) return;
+
+            setShowReportModal(false);
+            setReportError("");
           }}
         />
       )}
@@ -583,9 +661,11 @@ function GalleryImage({
 function ProviderCard({
   listing,
   onContact,
+  onReport,
 }: {
   listing: ListingDetails;
   onContact: () => void;
+  onReport: () => void;
 }) {
   const { lister } = listing;
 
@@ -668,17 +748,16 @@ function ProviderCard({
         </button>
       )}
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        {lister.emailLink && (
-          <a
-            href={lister.emailLink}
-            className="flex h-11 items-center justify-center gap-2 rounded-md border border-line-strong text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
-          >
-            <Mail className="h-4 w-4" />
-            Email
-          </a>
-        )}
-      </div>
+      <button
+        type="button"
+        onClick={onReport}
+        className="mt-3 flex w-full items-center justify-center gap-2
+    rounded-md px-4 py-3 text-sm font-medium text-danger
+    transition-colors hover:bg-danger-tint"
+      >
+        <Flag className="h-4 w-4" />
+        Report scam or suspicious activity
+      </button>
     </div>
   );
 }
