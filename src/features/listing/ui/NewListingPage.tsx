@@ -7,12 +7,14 @@ import { AlertTriangle, ArrowLeft, ImagePlus } from "lucide-react";
 
 import { useCreateListing } from "../hooks/useCreateListing";
 import { useMyRestrictions } from "../../lister-restrictions/hooks/useMyRestrictions";
+import MicroFeedbackForm from "../../feedback/ui/MicroFeedbackForm";
 
 export default function NewListingPage() {
   const router = useRouter();
 
   const [images, setImages] = useState<File[]>([]);
   const [serverError, setServerError] = useState("");
+  const [showMicroFeedback, setShowMicroFeedback] = useState(false);
 
   const { mutate: createListing, isPending } = useCreateListing();
 
@@ -60,7 +62,7 @@ export default function NewListingPage() {
       },
       {
         onSuccess: () => {
-          router.push("/lister-dashboard/listings");
+          setShowMicroFeedback(true);
         },
         onError: (error) => {
           setServerError(
@@ -70,6 +72,14 @@ export default function NewListingPage() {
       },
     );
   };
+
+  if (showMicroFeedback) {
+    return (
+      <MicroFeedbackForm
+        onDone={() => router.push("/lister-dashboard/listings")}
+      />
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-8">
