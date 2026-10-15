@@ -13,6 +13,7 @@ import {
   UserRound,
   Users,
   ShieldAlert,
+  MessageSquare,
 } from "lucide-react";
 import { useAuthStore } from "../../auth/store/authStore";
 import { useMyRestrictions } from "../../lister-restrictions/hooks/useMyRestrictions";
@@ -51,6 +52,11 @@ const NAVIGATION = [
 ];
 
 const SECONDARY_NAVIGATION = [
+  {
+    label: "Give feedback",
+    href: "/lister-dashboard/feedback",
+    icon: MessageSquare,
+  },
   {
     label: "Profile",
     href: "/lister-dashboard/profile",

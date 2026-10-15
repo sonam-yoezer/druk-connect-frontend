@@ -12,6 +12,7 @@ import {
   Settings,
   UserRound,
   Users,
+  MessageSquare,
 } from "lucide-react";
 import { useAuthStore } from "../../auth/store/authStore";
 
@@ -49,6 +50,11 @@ const NAVIGATION = [
 ];
 
 const SECONDARY_NAVIGATION = [
+  {
+    label: "Give feedback",
+    href: "/buyer-dashboard/feedback",
+    icon: MessageSquare,
+  },
   {
     label: "Profile",
     href: "/buyer-dashboard/profile",

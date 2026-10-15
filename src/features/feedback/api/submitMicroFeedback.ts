@@ -2,7 +2,7 @@ import { apiFetch } from "@/src/lib/api/client";
 import type {
   SubmitMicroFeedbackRequest,
   SubmitMicroFeedbackResponse,
-} from "../types/microFeedback";
+} from "../types/feedback";
 
 export async function submitMicroFeedback(
   data: SubmitMicroFeedbackRequest,
