@@ -12,6 +12,7 @@ import type { AdminFeedbackItem } from "./types/adminFeedback";
 import { useAdminFeedback } from "./hooks/useAdminFeedback";
 import { useUpdateAdminFeedbackStatus } from "./hooks/useUpdateAdminFeedbackStatus";
 import type { AdminFeedbackStatus } from "./api/updateAdminFeedbackStatus";
+import { AdminFeedbackScreenshot } from "./ui/AdminFeedbackScreenshot";
 
 const PAGE_SIZE = 20;
 
@@ -196,9 +197,11 @@ function FeedbackCard({ item }: { item: AdminFeedbackItem }) {
         <div className="mt-4 rounded-lg bg-background p-3">
           <p className="text-sm font-medium text-ink">Screenshot attached</p>
 
-          <p className="mt-1 break-all text-xs text-muted">
-            {item.screenshotPath}
-          </p>
+          {item.screenshotPath && (
+            <div className="mt-4 rounded-lg bg-background p-3">
+              <AdminFeedbackScreenshot feedbackId={item.feedbackId} />
+            </div>
+          )}
         </div>
       )}
 
