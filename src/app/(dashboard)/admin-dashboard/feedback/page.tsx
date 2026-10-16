@@ -1,4 +1,5 @@
 import AdminFeedbackList from "@/src/features/admin-dashboard/AdminFeedbackList";
+import FeedbackAnalyticsCards from "@/src/features/admin-dashboard/FeedbackAnalyticsCards";
 
 export default function AdminFeedbackPage() {
   return (
@@ -11,6 +12,10 @@ export default function AdminFeedbackPage() {
         </p>
       </div>
 
+      {/* Analytics overview */}
+      <FeedbackAnalyticsCards />
+
+      {/* Paginated feedback submissions */}
       <AdminFeedbackList />
     </main>
   );
