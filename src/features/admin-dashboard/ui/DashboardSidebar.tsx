@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  MessageSquareText,
   Search,
   Settings,
   ShieldAlert,
@@ -53,6 +54,11 @@ const NAVIGATION = [
     label: "Appeals",
     href: "/admin-dashboard/appeals",
     icon: FileText,
+  },
+  {
+    label: "Feedback",
+    href: "/admin-dashboard/feedback",
+    icon: MessageSquareText,
   },
   //   {
   //     label: "Vouches",
