@@ -7,11 +7,14 @@ import { AlertTriangle, ArrowLeft, ImagePlus } from "lucide-react";
 
 import { useCreateListing } from "../hooks/useCreateListing";
 import { useMyRestrictions } from "../../lister-restrictions/hooks/useMyRestrictions";
+import { AvailabilityDaysField } from "./AvailabilityDaysField";
+import type { AvailabilityDay } from "../utils/availability";
 import MicroFeedbackForm from "../../feedback/ui/MicroFeedbackForm";
 
 export default function NewListingPage() {
   const router = useRouter();
 
+  const [availability, setAvailability] = useState<AvailabilityDay[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [serverError, setServerError] = useState("");
   const [showMicroFeedback, setShowMicroFeedback] = useState(false);
@@ -31,6 +34,7 @@ export default function NewListingPage() {
     event.preventDefault();
     setServerError("");
 
+    if (availability.length === 0) { setServerError("Select at least one available day."); return; }
     const formData = new FormData(event.currentTarget);
 
     const pricingType = formData.get("pricingType") as "PAID" | "FREE";
@@ -46,10 +50,7 @@ export default function NewListingPage() {
       description: formData.get("description") as string,
       serviceType: formData.get("serviceType") as string,
       dietaryOptions,
-      availability: formData.get("availability") as
-        | "BOTH"
-        | "WEEKDAYS"
-        | "WEEKENDS",
+      availability: availability.join(","),
       pricingType: formData.get("pricingType") as "PAID" | "FREE",
       rateAmount:
         pricingType === "PAID" ? Number(formData.get("rateAmount")) : null,
@@ -306,17 +307,7 @@ export default function NewListingPage() {
                   </div>
                 </div>
 
-                <SelectField
-                  label="Availability"
-                  name="availability"
-                  options={["BOTH", "WEEKDAYS", "WEEKENDS"]}
-                  optionLabels={{
-                    BOTH: "Weekdays & weekends",
-                    WEEKDAYS: "Weekdays",
-                    WEEKENDS: "Weekends",
-                  }}
-                  required
-                />
+                <AvailabilityDaysField value={availability} onChange={setAvailability} disabled={isPending} />
               </div>
             </section>
 

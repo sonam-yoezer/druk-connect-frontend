@@ -1,7 +1,7 @@
 import { apiFetch } from "@/src/lib/api/client";
-import type { ListingsResponse } from "../types/listing";
+import type { MyListingsResponse } from "../types/listing";
 
-export async function getMyListings(): Promise<ListingsResponse> {
+export async function getMyListings(): Promise<MyListingsResponse> {
   const response = await apiFetch("/api/v1/listings/getMyListings");
 
   if (!response.ok) {
