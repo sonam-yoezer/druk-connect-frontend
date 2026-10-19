@@ -3,24 +3,26 @@ import { apiFetch } from "@/src/lib/api/client";
 export type UpdateListingData = {
   pricingType?: "PAID" | "FREE";
   rateAmount?: number | null;
-  availability?: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  availability?: string;
+  retainedImageIds?: string[];
+  images?: File[];
 };
 
-export async function updateListing(
-  listingId: string,
-  data: UpdateListingData,
-): Promise<void> {
-  const response = await apiFetch(`/api/v1/listings/${listingId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
-
+export async function updateListing(listingId: string, data: UpdateListingData): Promise<void> {
+  const { images, ...fields } = data;
+  const options: RequestInit = { method: "PATCH" };
+  if (images?.length) {
+    const body = new FormData();
+    body.append("data", JSON.stringify(fields));
+    images.forEach(image => body.append("images", image));
+    options.body = body;
+  } else {
+    options.headers = { "Content-Type": "application/json" };
+    options.body = JSON.stringify(fields);
+  }
+  const response = await apiFetch(`/api/v1/listings/${listingId}`, options);
   if (!response.ok) {
-    const text = await response.text();
-
-    throw new Error(text || "Failed to update listing");
+    const error = await response.json().catch(() => null);
+    throw new Error(error?.message || "Failed to update listing");
   }
 }

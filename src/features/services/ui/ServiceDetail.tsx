@@ -1,5 +1,7 @@
 "use client";
 
+import { formatAvailabilityDays } from "../../listing/utils/availability";
+
 import {
   ArrowLeft,
   CalendarDays,
@@ -613,16 +615,7 @@ function SectionHeading({ children }: { children: React.ReactNode }) {
 }
 
 function formatAvailability(availability: ListingDetails["availability"]) {
-  switch (availability) {
-    case "BOTH":
-      return "Weekdays & weekends";
-    case "WEEKDAYS":
-      return "Weekdays";
-    case "WEEKENDS":
-      return "Weekends";
-    default:
-      return availability;
-  }
+  return formatAvailabilityDays(availability);
 }
 
 function formatDate(value: string) {

@@ -1,3 +1,4 @@
+import { formatAvailabilityDays } from "../../listing/utils/availability";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Star } from "lucide-react";
 
@@ -134,17 +135,5 @@ function getPriceLabel(
 }
 
 function formatAvailability(availability: ListingSearchResult["availability"]) {
-  switch (availability) {
-    case "BOTH":
-      return "Weekdays & weekends";
-
-    case "WEEKDAYS":
-      return "Weekdays";
-
-    case "WEEKENDS":
-      return "Weekends";
-
-    default:
-      return availability;
-  }
+  return formatAvailabilityDays(availability);
 }

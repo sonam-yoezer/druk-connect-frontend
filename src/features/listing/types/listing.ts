@@ -7,7 +7,7 @@ export type CreateListingData = {
   description: string;
   serviceType: string;
   dietaryOptions: string[];
-  availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  availability: string;
   pricingType: "PAID" | "FREE";
   rateAmount: number | null;
 };
@@ -37,10 +37,11 @@ export type Listing = {
   id: string;
   listingTitle: string;
   listingCategory: string;
-  city: string;
-  cuisine: string;
+  suburb: string;
+  state: string;
+  postcode: string;
   serviceType: string;
-  availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  availability: string;
   pricingType: "PAID" | "FREE";
   rateAmount: number | null;
   currencyCode: string;
@@ -61,7 +62,7 @@ export type ListingSearchResult = {
   city: string;
   cuisine: string;
   serviceType: string;
-  availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  availability: string;
   pricingType: "PAID" | "FREE";
   rateAmount: number | null;
   currencyCode: string;
@@ -128,7 +129,7 @@ export type ListingDetails = {
   minimumOrder: number;
   serves: number;
   dietaryOptions: string[];
-  availability: "BOTH" | "WEEKDAYS" | "WEEKENDS";
+  availability: string;
   pricingType: "PAID" | "FREE";
   rateAmount: number | null;
   currencyCode: string;
@@ -141,3 +142,5 @@ export type ListingDetails = {
   reviews: ListingReview[];
   createdAt: string;
 };
+
+export type MyListingsResponse = Omit<ListingsResponse, "listings"> & { listings: Listing[] };

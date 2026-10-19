@@ -46,7 +46,7 @@ export default function ListingsPage() {
         !normalizedSearch ||
         listing.listingTitle.toLowerCase().includes(normalizedSearch) ||
         listing.listingCategory.toLowerCase().includes(normalizedSearch) ||
-        listing.city.toLowerCase().includes(normalizedSearch);
+        listing.suburb.toLowerCase().includes(normalizedSearch);
 
       const matchesStatus =
         status === "All" ||
@@ -179,7 +179,7 @@ export default function ListingsPage() {
           listings={filteredListings}
           deletingListingId={deletingListingId}
           onDelete={handleDelete}
-          onEdit={setEditingListing}
+          onEdit={listing => { updateListingMutation.reset(); setEditingListing(listing); }}
         />
       ) : (
         <EmptyState search={search} hasListings={listings.length > 0} />
@@ -187,7 +187,9 @@ export default function ListingsPage() {
 
       {editingListing && (
         <EditListingModal
+          key={editingListing.id}
           listing={editingListing}
+          error={updateListingMutation.error?.message}
           isUpdating={updateListingMutation.isPending}
           onClose={() => {
             if (!updateListingMutation.isPending) {
@@ -282,7 +284,7 @@ function ListingRow({
 
             <div className="mt-2 flex items-center gap-1.5 text-xs text-muted">
               <MapPin className="h-3.5 w-3.5 shrink-0 text-faint" />
-              <span>{listing.city}</span>
+              <span>{listing.suburb}</span>
             </div>
 
             <p className="mt-1 text-xs text-faint">
