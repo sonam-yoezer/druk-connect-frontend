@@ -59,7 +59,8 @@ export type ListingSearchResult = {
   id: string;
   listingTitle: string;
   listingCategory: string;
-  city: string;
+  suburb: string;
+  state: string;
   cuisine: string;
   serviceType: string;
   availability: string;
@@ -143,4 +144,6 @@ export type ListingDetails = {
   createdAt: string;
 };
 
-export type MyListingsResponse = Omit<ListingsResponse, "listings"> & { listings: Listing[] };
+export type MyListingsResponse = Omit<ListingsResponse, "listings"> & {
+  listings: Listing[];
+};
