@@ -13,7 +13,7 @@ import { ChooseRole } from "./ui/sign-up/ChooseRole";
 import { EmailVerification } from "./ui/sign-up/EmailVerification";
 import { MemberVouch } from "./ui/sign-up/MemberVouch";
 import { Header } from "../landing-page/ui/Header";
-import { useSearchParams } from "next/dist/client/components/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type SignupRole = "LISTER" | "BUYER";
 
@@ -43,6 +43,7 @@ const INITIAL_SIGNUP_DATA: SignupData = {
 const INITIAL_STEP = 1;
 
 export default function SignupPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const roleParam = searchParams.get("role");
@@ -171,6 +172,17 @@ export default function SignupPage() {
     );
   };
 
+  const handleFinish = () => {
+    if (role === "BUYER") {
+      router.replace("/buyer-dashboard");
+      return;
+    }
+
+    if (role === "LISTER") {
+      router.replace("/lister-dashboard");
+    }
+  };
+
   /**
    * Show role selection before the signup flow starts.
    */
@@ -227,10 +239,14 @@ export default function SignupPage() {
               )}
 
               {/* STEP 3 — Buyer Finish */}
-              {step === 3 && role === "BUYER" && <AgreeFinish />}
+              {step === 3 && role === "BUYER" && (
+                <AgreeFinish onFinish={handleFinish} />
+              )}
 
               {/* STEP 4 — Lister Finish */}
-              {step === 4 && role === "LISTER" && <AgreeFinish />}
+              {step === 4 && role === "LISTER" && (
+                <AgreeFinish onFinish={handleFinish} />
+              )}
             </div>
           </div>
         </div>
