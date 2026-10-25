@@ -33,7 +33,7 @@ const NAVIGATION = [
   //   icon: MessageCircle,
   // },
   {
-    label: "My Requests",
+    label: "Vouch Requests",
     href: "/buyer-dashboard/requests",
     icon: Users,
   },
