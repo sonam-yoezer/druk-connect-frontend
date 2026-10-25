@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { ShieldCheck } from "lucide-react";
+
 import { useGivenVouches } from "../hooks/useGivenVouches";
 import { useWithdrawVouch } from "../hooks/useWithdrawVouch";
 import { GivenVouch } from "../types/vouchRequest";
@@ -18,7 +20,6 @@ export default function ManageVouchesPage() {
   const withdrawVouchMutation = useWithdrawVouch();
 
   const [selectedVouch, setSelectedVouch] = useState<GivenVouch | null>(null);
-
   const [withdrawalReason, setWithdrawalReason] = useState("");
 
   if (isLoading) {
@@ -73,58 +74,64 @@ export default function ManageVouchesPage() {
 
       handleCloseWithdrawal();
     } catch {
-      // Mutation error is displayed by the modal.
+      // The mutation error is displayed by the modal.
     }
   };
 
   return (
     <>
       <div className="space-y-8">
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1C2541]">
-            Manage Vouches
+        {/* Page header */}
+        <header>
+          <h1 className="font-serif text-3xl font-medium tracking-tight text-ink">
+            Manage vouches
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
             Manage the people you have vouched for in the community.
           </p>
-        </div>
+        </header>
 
         {/* Summary */}
-        <div className="rounded-2xl border border-gray-200 bg-white p-5">
+        <section
+          aria-label="Vouch summary"
+          className="relative overflow-hidden rounded-md border border-line bg-white p-4 sm:p-5"
+        >
           <div className="flex items-center gap-4">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#7A2E33]/10">
-              <svg
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#7A2E33]/10">
+              <ShieldCheck
+                aria-hidden="true"
                 className="h-5 w-5 text-[#7A2E33]"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
-                <path d="m9 12 2 2 4-4" />
-              </svg>
+              />
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">People you've vouched for</p>
-
-              <p className="mt-1 text-2xl font-semibold text-[#1C2541]">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-muted">
+                People you've vouched for
+              </p>
+              <p className="mt-1 text-2xl font-semibold leading-none tracking-tight text-ink">
                 {totalVouchedUsers}
               </p>
             </div>
+
+            <div className="hidden border-l border-line pl-4 sm:block">
+              <p className="text-xs leading-5 text-muted">
+                Trusted community
+                <br />
+                connections
+              </p>
+            </div>
           </div>
-        </div>
+        </section>
 
         {/* Vouches */}
-        <section>
+        <section aria-label="Your vouches">
           <div className="mb-4">
-            <h2 className="text-lg font-semibold text-[#1C2541]">
+            <h2 className="text-lg font-semibold tracking-tight text-ink">
               Your vouches
             </h2>
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mt-1 text-sm leading-6 text-muted">
               People you've vouched for as a trusted member.
             </p>
           </div>

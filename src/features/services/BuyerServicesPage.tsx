@@ -5,8 +5,12 @@ import { useState } from "react";
 import { useSearchListings } from "../listing/hooks/useSearchListings";
 import { ServiceCard } from "./ui/ServiceCard";
 
+const ALL_CATEGORIES = "All categories";
+const ALL_CITIES = "All cities";
+const PAGE_SIZE = 10;
+
 const CITIES = [
-  "All cities",
+  ALL_CITIES,
   "Melbourne",
   "Sydney",
   "Brisbane",
@@ -16,7 +20,7 @@ const CITIES = [
 ];
 
 const CATEGORIES = [
-  "All categories",
+  ALL_CATEGORIES,
   "Food & Catering",
   "Tax & Accounting",
   "Moving & Relocation",
@@ -29,46 +33,34 @@ const CATEGORIES = [
 ];
 
 export default function BuyerServicesPage() {
-  const [category, setCategory] = useState("All categories");
-  const [city, setCity] = useState("All cities");
+  const [category, setCategory] = useState(ALL_CATEGORIES);
+  const [city, setCity] = useState(ALL_CITIES);
   const [search, setSearch] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const pageSize = 10;
+  const { data, isLoading, isError, error, isFetching, isPlaceholderData } =
+    useSearchListings({
+      category: category === ALL_CATEGORIES ? undefined : category,
+      city: city === ALL_CITIES ? undefined : city,
+      q: searchQuery || undefined,
+      page,
+      size: PAGE_SIZE,
+    });
 
-  const { data, isLoading, isError, error, isFetching } = useSearchListings({
-    category: category === "All categories" ? undefined : category,
-    city: city === "All cities" ? undefined : city,
-    q: searchQuery || undefined,
-    page,
-    size: pageSize,
-  });
+  const isUpdating = isFetching && isPlaceholderData;
 
   const listings = data?.listings ?? [];
+  const total = data?.totalElements ?? 0;
 
   const hasFilters =
-    category !== "All categories" ||
-    city !== "All cities" ||
-    searchQuery !== "";
+    category !== ALL_CATEGORIES || city !== ALL_CITIES || searchQuery !== "";
 
   const clearFilters = () => {
-    setCategory("All categories");
-    setCity("All cities");
+    setCategory(ALL_CATEGORIES);
+    setCity(ALL_CITIES);
     setSearch("");
     setSearchQuery("");
-    setPage(1);
-  };
-
-  const handleCategoryChange = (
-    event: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setCategory(event.target.value);
-    setPage(1);
-  };
-
-  const handleCityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setCity(event.target.value);
     setPage(1);
   };
 
@@ -77,202 +69,97 @@ export default function BuyerServicesPage() {
     setPage(1);
   };
 
-  const handleSearchKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (event.key === "Enter") {
-      handleSearch();
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="space-y-8">
-        {/* Page heading */}
-        <div>
-          <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink">
-            Browse services
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-            Find trusted services from the Bhutanese community in Australia.
-          </p>
-        </div>
-
-        {/* Loading cards */}
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-md border border-line bg-surface"
-            >
-              <div className="aspect-[4/3] animate-pulse bg-line/40" />
-
-              <div className="space-y-3 p-5">
-                <div className="h-4 w-24 animate-pulse rounded bg-line/50" />
-
-                <div className="h-6 w-3/4 animate-pulse rounded bg-line/50" />
-
-                <div className="h-4 w-1/2 animate-pulse rounded bg-line/50" />
-
-                <div className="h-4 w-1/3 animate-pulse rounded bg-line/50" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="space-y-8">
-        {/* Page heading */}
-        <div>
-          <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink">
-            Browse services
-          </h1>
-
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
-            Find trusted services from the Bhutanese community in Australia.
-          </p>
-        </div>
-
-        {/* Error */}
-        <div className="border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
-          <Search className="mx-auto h-8 w-8 text-faint" />
-
-          <h2 className="mt-5 font-serif text-2xl font-medium text-ink">
-            We couldn't load the services.
-          </h2>
-
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-            Something went wrong while loading the community listings. Please
-            try again.
-          </p>
-
-          {error?.message && (
-            <p className="mt-2 text-xs text-muted">{error.message}</p>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-8">
-      {/* Page heading */}
+      {/* Page heading — identical in every state, so no layout jump */}
       <div>
-        <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink">
+        <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink sm:text-4xl">
           Browse services
         </h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
+          Find trusted services from the Bhutanese community in Australia.
+        </p>
       </div>
 
-      {/* Filters */}
+      {/* Filters — always mounted */}
       <div className="rounded-md border border-line-strong bg-surface p-3 sm:p-4">
         <div className="flex flex-col gap-3 lg:flex-row">
-          {/* Category */}
-          <select
+          <FilterSelect
             value={category}
-            onChange={handleCategoryChange}
-            className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
-          >
-            {CATEGORIES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+            options={CATEGORIES}
+            onChange={(value) => {
+              setCategory(value);
+              setPage(1);
+            }}
+          />
 
-          {/* City */}
-          <select
+          <FilterSelect
             value={city}
-            onChange={handleCityChange}
-            className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
-          >
-            {CITIES.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
+            options={CITIES}
+            onChange={(value) => {
+              setCity(value);
+              setPage(1);
+            }}
+          />
 
-          {/* Search */}
           <div className="flex min-w-0 flex-1 items-center rounded-md border border-line bg-background px-3 focus-within:border-brand">
             <Search className="h-4 w-4 shrink-0 text-muted" />
-
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              onKeyDown={handleSearchKeyDown}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") handleSearch();
+              }}
               placeholder="Search services, providers..."
               className="h-11 min-w-0 flex-1 bg-transparent px-3 text-sm text-ink outline-none placeholder:text-faint"
             />
           </div>
 
-          {/* Search button */}
           <button
             type="button"
             onClick={handleSearch}
-            disabled={isFetching}
-            className="h-11 shrink-0 rounded-md bg-brand px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 shrink-0 rounded-md bg-brand px-6 text-sm font-semibold text-white transition-colors hover:bg-brand-dark"
           >
-            {isFetching ? "Searching..." : "Search"}
+            Search
           </button>
         </div>
 
-        {/* Active filters */}
         {hasFilters && (
           <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line pt-3">
             <span className="mr-1 text-xs font-medium text-muted">
               Filters:
             </span>
 
-            {category !== "All categories" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCategory("All categories");
+            {category !== ALL_CATEGORIES && (
+              <FilterChip
+                label={category}
+                onRemove={() => {
+                  setCategory(ALL_CATEGORIES);
                   setPage(1);
                 }}
-                className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
-              >
-                {category}
-
-                <X className="h-3 w-3" />
-              </button>
+              />
             )}
 
-            {city !== "All cities" && (
-              <button
-                type="button"
-                onClick={() => {
-                  setCity("All cities");
+            {city !== ALL_CITIES && (
+              <FilterChip
+                label={city}
+                onRemove={() => {
+                  setCity(ALL_CITIES);
                   setPage(1);
                 }}
-                className="inline-flex items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
-              >
-                {city}
-
-                <X className="h-3 w-3" />
-              </button>
+              />
             )}
 
             {searchQuery && (
-              <button
-                type="button"
-                onClick={() => {
+              <FilterChip
+                label={`"${searchQuery}"`}
+                onRemove={() => {
                   setSearch("");
                   setSearchQuery("");
                   setPage(1);
                 }}
-                className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
-              >
-                <span className="max-w-40 truncate">"{searchQuery}"</span>
-
-                <X className="h-3 w-3 shrink-0" />
-              </button>
+              />
             )}
 
             <button
@@ -292,75 +179,70 @@ export default function BuyerServicesPage() {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
             Community listings
           </p>
-
           <h2 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink">
             Find what you need.
           </h2>
         </div>
 
-        <p className="hidden text-sm text-muted sm:block">
-          <span className="font-semibold text-ink">
-            {data?.totalElements ?? 0}
-          </span>{" "}
-          {data?.totalElements === 1 ? "listing" : "listings"}
-        </p>
+        {!isLoading && !isError && (
+          <p className="hidden text-sm text-muted sm:block">
+            <span className="font-semibold text-ink">{total}</span>{" "}
+            {total === 1 ? "listing" : "listings"}
+          </p>
+        )}
       </div>
 
-      {/* Results */}
-      {listings.length > 0 ? (
-        <div className="relative">
-          {isFetching && (
-            <div className="absolute inset-x-0 -top-4 h-0.5 overflow-hidden rounded-full bg-brand/20">
-              <div className="h-full w-1/3 animate-pulse bg-brand" />
-            </div>
-          )}
-
-          <div className="grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {listings.map((listing) => (
-              <ServiceCard
-                key={listing.id}
-                listing={listing}
-                hrefBase="/buyer-dashboard/services"
-              />
-            ))}
-          </div>
+      {/* Results — the only part that changes between states */}
+      {isLoading ? (
+        <ResultsSkeleton />
+      ) : isError ? (
+        <EmptyState
+          title="We couldn't load the services."
+          description="Something went wrong while loading the community listings. Please try again."
+          detail={error?.message}
+        />
+      ) : listings.length > 0 ? (
+        <div
+          aria-busy={isUpdating}
+          className={`grid items-stretch gap-5 transition-opacity duration-200 sm:grid-cols-2 lg:grid-cols-3 ${
+            isUpdating ? "opacity-60" : "opacity-100"
+          }`}
+        >
+          {listings.map((listing) => (
+            <ServiceCard
+              key={listing.id}
+              listing={listing}
+              hrefBase="/buyer-dashboard/services"
+            />
+          ))}
         </div>
       ) : (
-        <div className="border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
-          <Search className="mx-auto h-8 w-8 text-faint" />
-
-          <h3 className="mt-5 font-serif text-2xl font-medium text-ink">
-            No services found.
-          </h3>
-
-          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
-            Try changing your category, city, or search terms to find more
-            community listings.
-          </p>
-
-          {hasFilters && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="mt-6 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
-            >
-              Clear filters
-            </button>
-          )}
-        </div>
+        <EmptyState
+          title="No services found."
+          description="Try changing your category, city, or search terms to find more community listings."
+          action={
+            hasFilters ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="mt-6 rounded-md border border-line-strong bg-surface px-5 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-brand hover:text-brand"
+              >
+                Clear filters
+              </button>
+            ) : null
+          }
+        />
       )}
 
       {/* Pagination */}
       {data && data.totalPages > 1 && (
         <div className="flex items-center justify-center gap-4">
-          <button
-            type="button"
-            disabled={!data.hasPrevious || isFetching}
+          <PageButton
+            disabled={!data.hasPrevious || isUpdating}
             onClick={() => setPage((current) => current - 1)}
-            className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
           >
             Previous
-          </button>
+          </PageButton>
 
           <span className="text-sm text-muted">
             Page{" "}
@@ -368,16 +250,123 @@ export default function BuyerServicesPage() {
             of <span className="font-semibold text-ink">{data.totalPages}</span>
           </span>
 
-          <button
-            type="button"
-            disabled={!data.hasNext || isFetching}
+          <PageButton
+            disabled={!data.hasNext || isUpdating}
             onClick={() => setPage((current) => current + 1)}
-            className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next
-          </button>
+          </PageButton>
         </div>
       )}
+    </div>
+  );
+}
+
+function FilterSelect({
+  value,
+  options,
+  onChange,
+}: {
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      className="h-11 rounded-md border border-line bg-background px-3 text-sm text-ink outline-none transition-colors focus:border-brand"
+    >
+      {options.map((item) => (
+        <option key={item} value={item}>
+          {item}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+function FilterChip({
+  label,
+  onRemove,
+}: {
+  label: string;
+  onRemove: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onRemove}
+      className="inline-flex max-w-full items-center gap-1.5 rounded-md bg-brand-tint px-2.5 py-1.5 text-xs font-medium text-brand"
+    >
+      <span className="max-w-40 truncate">{label}</span>
+      <X className="h-3 w-3 shrink-0" />
+    </button>
+  );
+}
+
+function PageButton({
+  disabled,
+  onClick,
+  children,
+}: {
+  disabled: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="rounded-md border border-line-strong bg-surface px-4 py-2 text-sm font-medium text-ink disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {children}
+    </button>
+  );
+}
+
+function ResultsSkeleton() {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={index}
+          className="overflow-hidden rounded-md border border-line bg-surface"
+        >
+          <div className="aspect-[4/3] animate-pulse bg-line/40" />
+          <div className="space-y-3 p-5">
+            <div className="h-4 w-24 animate-pulse rounded bg-line/50" />
+            <div className="h-6 w-3/4 animate-pulse rounded bg-line/50" />
+            <div className="h-4 w-1/2 animate-pulse rounded bg-line/50" />
+            <div className="h-4 w-1/3 animate-pulse rounded bg-line/50" />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EmptyState({
+  title,
+  description,
+  detail,
+  action,
+}: {
+  title: string;
+  description: string;
+  detail?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="border border-dashed border-line-strong bg-surface px-6 py-16 text-center">
+      <Search className="mx-auto h-8 w-8 text-faint" />
+      <h3 className="mt-5 font-serif text-2xl font-medium text-ink">{title}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-muted">
+        {description}
+      </p>
+      {detail && <p className="mt-2 text-xs text-muted">{detail}</p>}
+      {action}
     </div>
   );
 }

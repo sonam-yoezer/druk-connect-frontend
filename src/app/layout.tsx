@@ -36,7 +36,7 @@ export default function RootLayout({
       lang="en"
       className={`${newsreader.variable} ${inter.variable} h-full antialiased`}
     >
-      <body>
+      <body suppressHydrationWarning>
         <QueryProvider>{children}</QueryProvider>
       </body>
     </html>

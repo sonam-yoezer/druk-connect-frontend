@@ -29,7 +29,7 @@ export default function BuyerDashboardPage() {
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
         <div>
           <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-ink sm:text-4xl">
-            Welcome back.
+            Welcome back
           </h1>
 
           <p className="mt-2 max-w-xl text-sm leading-6 text-muted">
@@ -50,7 +50,7 @@ export default function BuyerDashboardPage() {
       {/* Stats */}
       <section
         aria-label="Your activity"
-        className="grid grid-cols-1 gap-px overflow-hidden border border-line bg-line sm:grid-cols-3"
+        className="grid grid-cols-1 gap-px overflow-hidden border rounded-md border-line bg-line sm:grid-cols-3"
       >
         <BuyerStatCard
           label="Services used"
@@ -209,7 +209,7 @@ function BuyerServiceCard({
   return (
     <Link
       href={`/buyer-dashboard/services/${id}`}
-      className="group overflow-hidden border border-line bg-surface transition-colors hover:border-brand"
+      className="group overflow-hidden border border-line rounded-md bg-surface transition-colors hover:border-brand"
     >
       <div className="aspect-[16/10] overflow-hidden bg-background">
         {image ? (
