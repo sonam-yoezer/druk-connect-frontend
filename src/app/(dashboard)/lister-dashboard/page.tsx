@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Plus } from "lucide-react";
+
 import { ReputationCard } from "@/src/features/lister-dashboard/ui/ReputationCard";
 import { RequestCard } from "@/src/features/lister-dashboard/ui/RequestCard";
 import { StatCard } from "@/src/features/lister-dashboard/ui/StatCard";
 import { ListingCard } from "@/src/features/lister-dashboard/ui/ListingCard";
+import { useListerDashboard } from "@/src/features/lister-dashboard/hooks/useListerDashboard";
 
 const LISTINGS = [
   {
@@ -62,6 +66,14 @@ const REQUESTS = [
 ];
 
 export default function DashboardPage() {
+  const { data, isLoading, isError, error } = useListerDashboard();
+
+  const formatNumber = (value: number | undefined) =>
+    value === undefined ? "—" : value.toLocaleString();
+
+  const formatRating = (value: number | undefined) =>
+    value === undefined ? "—" : value.toFixed(1);
+
   return (
     <div className="space-y-10">
       <section className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
@@ -89,22 +101,53 @@ export default function DashboardPage() {
         </Link>
       </section>
 
+      {isError && (
+        <div
+          role="alert"
+          className="border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+        >
+          {error instanceof Error
+            ? error.message
+            : "Unable to load dashboard analytics. Please try again."}
+        </div>
+      )}
+
       <section className="grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Active listings"
-          value="3"
-          description="2 updated recently"
+          value={isLoading ? "..." : formatNumber(data?.activeListings)}
+          description={
+            isLoading
+              ? "Loading analytics..."
+              : `${formatNumber(data?.inactiveListings)} inactive listings`
+          }
         />
-
-        <StatCard label="Total views" value="126" description="This month" />
 
         <StatCard
-          label="Requests"
-          value="4"
-          description="2 need your attention"
+          label="Total views"
+          value={isLoading ? "..." : formatNumber(data?.totalListingViews)}
+          description="All-time listing views"
         />
 
-        <StatCard label="Rating" value="4.8" description="12 reviews" />
+        <StatCard
+          label="Buyers served"
+          value={isLoading ? "..." : formatNumber(data?.uniqueBuyersServed)}
+          description={
+            isLoading
+              ? "Loading analytics..."
+              : `${formatNumber(data?.servicesAvailedLast30Days)} services availed in 30 days`
+          }
+        />
+
+        <StatCard
+          label="Rating"
+          value={isLoading ? "..." : formatRating(data?.averageRating)}
+          description={
+            isLoading
+              ? "Loading analytics..."
+              : `${formatNumber(data?.approvedReviewCount)} approved reviews`
+          }
+        />
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
