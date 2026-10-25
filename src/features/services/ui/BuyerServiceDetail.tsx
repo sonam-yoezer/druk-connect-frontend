@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   CalendarDays,
   Check,
+  ChevronDown,
   Clock3,
   Eye,
   Flag,
@@ -672,12 +673,9 @@ function ProviderCard({
   const { lister } = listing;
 
   const handleWhatsAppClick = () => {
-    if (!lister.whatsappLink) {
-      return;
-    }
+    if (!lister.whatsappLink) return;
 
     window.open(lister.whatsappLink, "_blank", "noopener,noreferrer");
-
     onContact();
   };
 
@@ -700,26 +698,10 @@ function ProviderCard({
         </div>
       </div>
 
-      <div className="mt-5 flex items-center gap-2 rounded-md bg-jade-tint px-3 py-2.5">
-        <ShieldCheck className="h-4 w-4 shrink-0 text-jade" />
-
-        <span className="text-xs font-semibold text-jade">
-          Vouched by {lister.activeVouches}{" "}
-          {lister.activeVouches === 1 ? "member" : "members"}
-        </span>
-
-        {lister.vouches?.length > 0 && (
-          <div className="ml-auto flex">
-            {lister.vouches.slice(0, 3).map((vouch, index) => (
-              <VouchAvatar
-                key={vouch.vouchId}
-                name={vouch.voucherName}
-                className={index > 0 ? "-ml-2" : ""}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+      <VouchSummary
+        activeVouches={lister.activeVouches}
+        vouches={lister.vouches ?? []}
+      />
 
       <div className="my-5 grid grid-cols-3 border-y border-line py-4">
         <ProviderStat
@@ -753,13 +735,89 @@ function ProviderCard({
       <button
         type="button"
         onClick={onReport}
-        className="mt-3 flex w-full items-center justify-center gap-2
-    rounded-md px-4 py-3 text-sm font-medium text-danger
-    transition-colors hover:bg-danger-tint"
+        className="mt-3 flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-medium text-danger transition-colors hover:bg-danger-tint"
       >
         <Flag className="h-4 w-4" />
         Report scam or suspicious activity
       </button>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/* Vouch summary                                                               */
+/* -------------------------------------------------------------------------- */
+
+type Vouch = ListingDetails["lister"]["vouches"][number];
+
+function VouchSummary({
+  activeVouches,
+  vouches,
+}: {
+  activeVouches: number;
+  vouches: Vouch[];
+}) {
+  const [open, setOpen] = useState(false);
+  const hasVouches = vouches.length > 0;
+  const hiddenCount = Math.max(activeVouches - vouches.length, 0);
+
+  return (
+    <div className="mt-5 overflow-hidden rounded-md bg-jade-tint">
+      <button
+        type="button"
+        onClick={() => setOpen((value) => !value)}
+        disabled={!hasVouches}
+        aria-expanded={open}
+        aria-controls="voucher-list"
+        className="flex w-full items-center gap-2 px-3 py-2.5 text-left disabled:cursor-default"
+      >
+        <ShieldCheck className="h-4 w-4 shrink-0 text-jade" />
+
+        <span className="text-xs font-semibold text-jade">
+          Vouched by {activeVouches}{" "}
+          {activeVouches === 1 ? "member" : "members"}
+        </span>
+
+        {hasVouches && (
+          <div className="ml-auto flex items-center gap-2">
+            <div className="flex">
+              {vouches.slice(0, 3).map((vouch, index) => (
+                <VouchAvatar
+                  key={vouch.vouchId}
+                  name={vouch.voucherName}
+                  className={index > 0 ? "-ml-2" : ""}
+                />
+              ))}
+            </div>
+
+            <ChevronDown
+              className={`h-4 w-4 text-jade transition-transform duration-200 ${
+                open ? "rotate-180" : ""
+              }`}
+            />
+          </div>
+        )}
+      </button>
+
+      {open && hasVouches && (
+        <ul
+          id="voucher-list"
+          className="max-h-48 space-y-2 overflow-y-auto border-t border-jade/15 px-3 py-3"
+        >
+          {vouches.map((vouch) => (
+            <li key={vouch.vouchId} className="flex items-center gap-2.5">
+              <VouchAvatar name={vouch.voucherName} />
+              <span className="text-xs font-medium text-ink">
+                {vouch.voucherName}
+              </span>
+            </li>
+          ))}
+
+          {hiddenCount > 0 && (
+            <li className="pl-8 text-xs text-muted">+{hiddenCount} more</li>
+          )}
+        </ul>
+      )}
     </div>
   );
 }
