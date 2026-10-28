@@ -1,4 +1,5 @@
 "use client";
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

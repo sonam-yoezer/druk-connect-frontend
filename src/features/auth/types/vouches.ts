@@ -7,6 +7,7 @@ export interface VouchCountResponse {
 }
 
 export interface VouchUserSearchResponse {
+  profileImageUrl?: string | null;
   userId: string;
   firstName: string;
   lastName: string;

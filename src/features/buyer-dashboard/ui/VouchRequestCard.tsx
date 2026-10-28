@@ -1,4 +1,5 @@
 "use client";
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 
 import { Check, Clock3, Mail, X } from "lucide-react";
 
@@ -33,18 +34,12 @@ export default function VouchRequestCard({
 
   const isDeclining = isResponding && responding.action === "decline";
 
-  const initials = getInitials(
-    request.requesterFirstName,
-    request.requesterLastName,
-  );
 
   return (
     <article className="rounded-2xl border border-line bg-surface p-5 transition-shadow hover:shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-start gap-3">
-          <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand-tint text-sm font-semibold text-brand">
-            {initials}
-          </div>
+          <UserAvatar name={`${request.requesterFirstName} ${request.requesterLastName}`} imageUrl={request.profileImageUrl} size={40} />
 
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-ink">
@@ -159,11 +154,4 @@ function formatRequestedAt(date: string) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(parsedDate);
-}
-
-function getInitials(firstName: string, lastName: string) {
-  const firstInitial = firstName?.charAt(0) ?? "";
-  const lastInitial = lastName?.charAt(0) ?? "";
-
-  return `${firstInitial}${lastInitial}`.toUpperCase();
 }

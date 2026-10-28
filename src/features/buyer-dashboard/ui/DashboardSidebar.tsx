@@ -1,5 +1,7 @@
 "use client";
 
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -83,7 +85,6 @@ export function DashboardSidebar() {
   const userName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
 
-  const userInitial = user?.firstName?.charAt(0).toUpperCase() || "U";
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-line bg-surface lg:flex lg:flex-col">
@@ -129,9 +130,7 @@ export function DashboardSidebar() {
         {/* User */}
         <div className="mt-auto border-t border-line pt-5">
           <div className="flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-tint text-sm font-semibold text-brand">
-              {userInitial}
-            </div>
+            <UserAvatar name={userName} imageUrl={user?.profileImageUrl} size={36} />
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink">

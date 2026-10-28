@@ -1,5 +1,7 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { getMyProfile } from "@/src/features/profile/api/profile";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/src/features/auth/store/authStore";
@@ -23,6 +25,10 @@ export function ProtectedRoute({
   const user = useAuthStore((state) => state.user);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const hydrated = useAuthStore((state) => state.hydrated);
+
+  const profile = useQuery({ queryKey: ["my-profile", user?.id], queryFn: getMyProfile,
+    enabled: hydrated && isAuthenticated && Boolean(user), staleTime: 60_000, retry: false });
+  useEffect(() => { if (profile.data) useAuthStore.getState().updateUser(profile.data); }, [profile.data]);
 
   const userRoles = user?.roles ?? [];
   const userAccessType = user?.accessType;

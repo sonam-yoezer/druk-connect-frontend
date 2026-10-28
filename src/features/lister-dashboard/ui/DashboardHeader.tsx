@@ -1,10 +1,15 @@
 "use client";
 
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
+import { useAuthStore } from "../../auth/store/authStore";
+import { getDashboardRoute } from "@/src/shared/routes/getDashboardRoute";
 import Link from "next/link";
 import { Bell, Menu, Search } from "lucide-react";
 import { useState } from "react";
 
 export function DashboardHeader() {
+  const user = useAuthStore(state => state.user);
+  const dashboard = user ? getDashboardRoute(user) : "/buyer-dashboard";
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -44,11 +49,11 @@ export function DashboardHeader() {
             </button>
 
             <Link
-              href="/dashboard/profile"
+              href={`${dashboard}/profile`}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-tint text-sm font-semibold text-brand"
               aria-label="Open profile"
             >
-              T
+              <UserAvatar name={[user?.firstName, user?.lastName].filter(Boolean).join(" ")} imageUrl={user?.profileImageUrl} size={36} />
             </Link>
           </div>
         </div>
@@ -62,6 +67,8 @@ export function DashboardHeader() {
 }
 
 function MobileNavigation({ onClose }: { onClose: () => void }) {
+  const user = useAuthStore(state => state.user);
+  const base = user ? getDashboardRoute(user) : "/buyer-dashboard";
   const links = [
     ["Dashboard", "/dashboard"],
     ["My Listings", "/dashboard/listings"],
@@ -78,7 +85,7 @@ function MobileNavigation({ onClose }: { onClose: () => void }) {
         {links.map(([label, href]) => (
           <Link
             key={href}
-            href={href}
+            href={href.replace("/dashboard", base)}
             onClick={onClose}
             className="block rounded-md px-3 py-2.5 text-sm font-medium text-muted hover:bg-background hover:text-ink"
           >

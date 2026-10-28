@@ -9,7 +9,7 @@ export interface RecoveryStatus {
 }
 
 export interface RecoveryBuyers {
-  buyers: { userId: string; firstName: string; lastName: string; email: string; phoneNumber?: string; accessType: string; alreadyVouched?: boolean; requestPending?: boolean }[];
+  buyers: { userId: string; firstName: string; lastName: string; email: string; profileImageUrl?: string | null; phoneNumber?: string; accessType: string; alreadyVouched?: boolean; requestPending?: boolean }[];
   currentPage?: number;
   totalPages?: number;
   hasNext?: boolean;

@@ -1,5 +1,6 @@
 "use client";
 
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -219,28 +220,14 @@ export function initialsOf(name: string) {
 
 export function Avatar({
   name,
+  imageUrl,
   tone = "brand",
   size = 34,
 }: {
   name: string;
+  imageUrl?: string | null;
   tone?: "brand" | "jade" | "ink";
   size?: number;
 }) {
-  const tones = {
-    brand: "bg-brand-tint text-brand",
-    jade: "bg-jade-tint text-jade",
-    ink: "bg-ink/[0.07] text-muted",
-  }[tone];
-
-  return (
-    <span
-      style={{ width: size, height: size, fontSize: size * 0.36 }}
-      className={cn(
-        "grid shrink-0 place-items-center rounded-full font-semibold",
-        tones,
-      )}
-    >
-      {initialsOf(name) || "?"}
-    </span>
-  );
+  return <UserAvatar name={name} imageUrl={imageUrl} size={size} className={tone === "jade" ? "text-jade" : ""} />;
 }

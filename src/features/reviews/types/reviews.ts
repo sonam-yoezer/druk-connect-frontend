@@ -18,6 +18,7 @@ export type SubmitReviewResponse = {
 export type ReviewStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface AdminReview {
+  profileImageUrl?: string | null;
   reviewId: string;
   listingId: string;
   listingTitle: string;
