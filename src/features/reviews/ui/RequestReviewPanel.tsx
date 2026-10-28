@@ -1,4 +1,5 @@
 "use client";
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -114,6 +115,7 @@ export function RequestReviewPanel({ listingId }: { listingId: string }) {
                 key={buyer.userId}
                 className="space-y-2 border-t border-line py-3"
               >
+                <UserAvatar name={`${buyer.firstName} ${buyer.lastName}`} imageUrl={buyer.profileImageUrl} size={36} />
                 <p className="font-semibold">
                   {buyer.firstName} {buyer.lastName}
                 </p>

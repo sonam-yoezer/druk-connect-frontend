@@ -1,3 +1,4 @@
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 import { CalendarDays, Mail, Phone } from "lucide-react";
 
 import type { GivenVouch } from "../types/vouchRequest";
@@ -21,9 +22,7 @@ export default function VouchCard({ vouch, onWithdraw }: VouchCardProps) {
     <article className="rounded-md border border-line bg-white p-5 transition-shadow hover:shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-[#7A2E33] text-sm font-semibold text-white">
-            {getInitials(vouch.listerName)}
-          </div>
+          <UserAvatar name={vouch.listerName} imageUrl={vouch.profileImageUrl} size={44} />
 
           <div className="min-w-0">
             <h3 className="truncate font-semibold text-ink">
@@ -77,14 +76,4 @@ export default function VouchCard({ vouch, onWithdraw }: VouchCardProps) {
       )}
     </article>
   );
-}
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }

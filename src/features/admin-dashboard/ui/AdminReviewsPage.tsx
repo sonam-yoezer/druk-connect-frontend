@@ -1,4 +1,5 @@
 "use client";
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 
 import { useState } from "react";
 import { Check, Clock3, MessageSquare, Star, UserRound, X } from "lucide-react";
@@ -233,7 +234,7 @@ function ReviewCard({
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink">
-                {review.reviewerName}
+                <UserAvatar name={review.reviewerName} imageUrl={review.profileImageUrl} size={32} /> {review.reviewerName}
               </p>
 
               <p className="truncate text-xs text-muted">

@@ -1,4 +1,5 @@
 export interface IncomingVouchRequest {
+  profileImageUrl?: string | null;
   requestId: string;
   requesterUserId: string;
   requesterFirstName: string;
@@ -20,6 +21,7 @@ export interface RespondVouchRequestResponse {
 }
 
 export type GivenVouch = {
+  profileImageUrl?: string | null;
   vouchId: string;
   listerUserId: string;
   listerName: string;

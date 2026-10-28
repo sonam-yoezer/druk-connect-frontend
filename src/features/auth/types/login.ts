@@ -11,6 +11,7 @@ export interface LoginUser {
   phoneNumber: string;
   accessType: "BUYER" | "LISTER";
   roles: string[];
+  profileImageUrl?: string | null;
 }
 
 export interface AuthSession {

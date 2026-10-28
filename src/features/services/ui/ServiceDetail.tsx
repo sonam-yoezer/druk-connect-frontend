@@ -1,5 +1,7 @@
 "use client";
 
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
+
 import { formatAvailabilityDays } from "../../listing/utils/availability";
 
 import {
@@ -414,7 +416,7 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
     <div className="rounded-md border border-line bg-surface p-6">
       {/* Provider */}
       <div className="flex items-center gap-3.5">
-        <ProviderAvatar name={lister.name} />
+        <ProviderAvatar name={lister.name} imageUrl={lister.profileImageUrl} />
 
         <div className="min-w-0">
           <h2 className="font-serif text-lg font-medium text-ink">
@@ -444,7 +446,7 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
             {lister.vouches.slice(0, 3).map((vouch, index) => (
               <VouchAvatar
                 key={vouch.vouchId}
-                name={vouch.voucherName}
+                name={vouch.voucherName} imageUrl={vouch.profileImageUrl}
                 className={index > 0 ? "-ml-2" : ""}
               />
             ))}
@@ -494,29 +496,12 @@ function ProviderCard({ listing }: { listing: ListingDetails }) {
   );
 }
 
-function ProviderAvatar({ name }: { name: string }) {
-  return (
-    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-brand-tint text-sm font-semibold text-brand ring-2 ring-brand-tint">
-      {getInitials(name)}
-    </div>
-  );
+function ProviderAvatar({ name, imageUrl }: { name: string; imageUrl?: string | null }) {
+  return <UserAvatar name={name} imageUrl={imageUrl} size={56} className="ring-2 ring-brand-tint" />;
 }
 
-function VouchAvatar({
-  name,
-  className = "",
-}: {
-  name: string;
-  className?: string;
-}) {
-  return (
-    <div
-      title={name}
-      className={`flex h-6 w-6 items-center justify-center rounded-full border-2 border-jade-tint bg-surface text-[8px] font-bold text-jade ${className}`}
-    >
-      {getInitials(name)}
-    </div>
-  );
+function VouchAvatar({ name, imageUrl, className = "" }: { name: string; imageUrl?: string | null; className?: string }) {
+  return <UserAvatar name={name} imageUrl={imageUrl} size={24} className={`border-2 border-jade-tint ${className}`} />;
 }
 
 function RatingSummary({
@@ -579,8 +564,9 @@ function ReviewCard({ review }: { review: ListingReview }) {
     <article className="border-b border-line py-5 last:border-b-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
+          <UserAvatar name={review.reviewerName ?? review.reviewer ?? "Reviewer"} imageUrl={review.profileImageUrl} size={36} />
           <span className="text-sm font-semibold text-ink">
-            {review.reviewerName ?? "Anonymous"}
+            {review.reviewerName ?? review.reviewer ?? "Anonymous"}
           </span>
 
           {typeof review.rating === "number" && (
@@ -644,14 +630,7 @@ function getImageUrl(imageUrl: string) {
   return `${process.env.NEXT_PUBLIC_BACKEND_URL}${imageUrl}`;
 }
 
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase())
-    .join("");
-}
+
 
 function getReviewKey(review: ListingReview, index: number) {
   return (

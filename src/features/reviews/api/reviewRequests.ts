@@ -21,6 +21,7 @@ export interface ReviewInvitation {
   message: string;
 }
 export interface ReviewRecipient {
+  profileImageUrl?: string | null;
   userId: string;
   firstName: string;
   lastName: string;
@@ -78,6 +79,8 @@ export const sendReviewRequest = (id: string, buyerUserId: string) =>
   });
 
 export interface ServiceAvailment {
+  buyerProfileImageUrl?: string | null;
+  listerProfileImageUrl?: string | null;
   availmentId: string;
   listingId: string;
   listingTitle: string;

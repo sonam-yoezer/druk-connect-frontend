@@ -1,3 +1,4 @@
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
 import { formatAvailabilityDays } from "../../listing/utils/availability";
 import Link from "next/link";
 import { ArrowUpRight, MapPin, Star } from "lucide-react";
@@ -66,7 +67,8 @@ export function ServiceCard({
             <div className="mt-2 text-xs text-muted">{listing.cuisine}</div>
           )}
 
-          <p className="mt-3 text-xs text-muted">
+          <p className="mt-3 flex items-center gap-2 text-xs text-muted">
+            <UserAvatar name={listing.listerName} imageUrl={listing.listerProfileImageUrl} size={24} />
             By{" "}
             <span className="font-medium text-ink">{listing.listerName}</span>
           </p>

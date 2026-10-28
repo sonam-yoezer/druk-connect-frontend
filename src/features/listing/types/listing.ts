@@ -73,6 +73,7 @@ export type ListingSearchResult = {
   averageRating: number;
   averageRatingStar: number;
   listerName: string;
+  listerProfileImageUrl?: string | null;
 };
 
 export type SearchListingsParams = {
@@ -94,6 +95,7 @@ export type ListingsResponse = {
 };
 
 export type ListingVouch = {
+  profileImageUrl?: string | null;
   vouchId: string;
   voucherUserId: string;
   voucherName: string;
@@ -101,6 +103,7 @@ export type ListingVouch = {
 };
 
 export type ListingLister = {
+  profileImageUrl?: string | null;
   userId: string;
   name: string;
   email: string;
@@ -112,6 +115,10 @@ export type ListingLister = {
 };
 
 export type ListingReview = {
+  profileImageUrl?: string | null;
+  reviewer?: string;
+  reviewId?: string;
+  submittedAt?: string;
   id?: string;
   rating?: number;
   comment?: string;

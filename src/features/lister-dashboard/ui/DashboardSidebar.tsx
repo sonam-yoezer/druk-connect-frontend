@@ -1,5 +1,7 @@
 "use client";
 
+import { UserAvatar } from "@/src/shared/ui/UserAvatar";
+
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -73,6 +75,8 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const user = useAuthStore(state => state.user);
+  const userName = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "User";
   const clearSession = useAuthStore((state) => state.clearSession);
 
   const handleLogout = () => {
@@ -145,13 +149,11 @@ export function DashboardSidebar() {
 
         <div className="mt-auto border-t border-line pt-5">
           <div className="flex items-center gap-3 px-2">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-tint text-sm font-semibold text-brand">
-              T
-            </div>
+            <UserAvatar name={userName} imageUrl={user?.profileImageUrl} size={36} />
 
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-ink">
-                Tashi Wangchuk
+                {userName}
               </p>
 
               <p className="text-xs text-muted">Lister</p>

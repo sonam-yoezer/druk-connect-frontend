@@ -304,7 +304,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
                 className="rounded-xl border border-line bg-surface p-3.5"
               >
                 <div className="flex items-center">
-                  <Avatar name={memberName} tone="ink" size={32} />
+                  <Avatar imageUrl={member.profileImageUrl} name={memberName} tone="ink" size={32} />
                 </div>
 
                 <p className="mt-2.5 truncate text-[13.5px] font-medium text-ink">
@@ -394,7 +394,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
                       className="flex items-center justify-between gap-3 bg-surface px-3.5 py-3"
                     >
                       <div className="flex min-w-0 items-center gap-2.5">
-                        <Avatar name={memberName} size={32} />
+                        <Avatar imageUrl={member.profileImageUrl} name={memberName} size={32} />
 
                         <div className="min-w-0">
                           <p className="truncate text-[13.5px] font-medium text-ink">
@@ -437,7 +437,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
         </p>
 
         <p className="mt-1 text-[12.5px] leading-5 text-muted">
-          Invite them. When they finish signing up, we'll ask if they want to
+          Invite them. When they finish signing up, we&apos;ll ask if they want to
           vouch for you.
         </p>
 
@@ -473,7 +473,7 @@ export function MemberVouch({ userId, onNext }: MemberVouchProps) {
 
         {inviteSent && (
           <Hint>
-            <span className="text-jade">Invite sent.</span> We'll let you know
+            <span className="text-jade">Invite sent.</span> We&apos;ll let you know
             when they join.
           </Hint>
         )}
